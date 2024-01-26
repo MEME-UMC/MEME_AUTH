@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
-@Getter
+@Getter @Entity
 public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
