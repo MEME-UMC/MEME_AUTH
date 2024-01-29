@@ -11,11 +11,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import umc.meme.auth.global.auth.PrincipalDetailsService;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import umc.meme.auth.global.jwt.JwtAccessDeniedHandler;
+import umc.meme.auth.global.jwt.JwtCustomAuthenticationFilter;
+import umc.meme.auth.global.auth.PrincipalDetailsService;
 import umc.meme.auth.global.jwt.JwtAuthenticationEntryPoint;
-import umc.meme.auth.global.jwt.JwtSecurityConfig;
-import umc.meme.auth.global.jwt.TokenProvider;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.*;
 
@@ -25,9 +25,9 @@ import static org.springframework.security.config.http.SessionCreationPolicy.*;
 public class SecurityConfig {
 
     private final PrincipalDetailsService userDetailService;
-    private final TokenProvider tokenProvider;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final JwtCustomAuthenticationFilter jwtCustomAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,15 +38,19 @@ public class SecurityConfig {
                 )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .exceptionHandling((exceptionHandling) ->
+                        exceptionHandling
+                                .authenticationEntryPoint(authenticationEntryPoint)  // 401
+                                .accessDeniedHandler(accessDeniedHandler)  // 403
+                )
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/api/v1/auth/signup").permitAll()
-                                .requestMatchers("/api/v1/auth/authenticate").permitAll()
-                                .requestMatchers("/api/v1/auth/access-token").permitAll()
-                ).exceptionHandling(c -> c.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jwtAccessDeniedHandler)
-                ).apply(new JwtSecurityConfig(tokenProvider))
+                                .requestMatchers("/api/v0/auth/signup").permitAll()
+                                .requestMatchers("/api/v0/auth/login").permitAll()
+                                .requestMatchers("/api/v0/auth/reissue").permitAll()
+                );
 
-        ;
+        http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

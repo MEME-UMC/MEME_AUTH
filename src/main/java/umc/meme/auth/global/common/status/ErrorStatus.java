@@ -1,12 +1,10 @@
 package umc.meme.auth.global.common.status;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import umc.meme.auth.global.common.BaseErrorCode;
 import umc.meme.auth.global.common.ErrorReasonDto;
-
 
 @Getter
 @AllArgsConstructor

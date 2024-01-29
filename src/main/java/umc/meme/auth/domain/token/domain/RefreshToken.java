@@ -1,26 +1,27 @@
 package umc.meme.auth.domain.token.domain;
 
 import jakarta.persistence.Id;
+import lombok.Builder;
 
 import java.io.Serializable;
 
-//@RedisHash(value = "refreshToken", timeToLive = 60)
+@Builder
 public class RefreshToken implements Serializable {
 
     @Id
     private String refreshToken;
-    private Long memberId;
+    private String accessToken;
 
-    public RefreshToken(final String refreshToken, final Long memberId) {
+    public RefreshToken(final String refreshToken, final String accessToken) {
         this.refreshToken = refreshToken;
-        this.memberId = memberId;
+        this.accessToken = accessToken;
     }
 
     public String getRefreshToken() {
         return refreshToken;
     }
 
-    public Long getMemberId() {
-        return memberId;
+    public String getAccessToken() {
+        return accessToken;
     }
 }
