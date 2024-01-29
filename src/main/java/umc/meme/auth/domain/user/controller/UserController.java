@@ -15,7 +15,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/api/v1/auth/signup")
+    @PostMapping("/api/v0/auth/signup")
     public ResponseEntity<?> signup(@RequestBody UserRequest.JoinDto joinDto) {
         userService.signup(joinDto);
         return ResponseEntity.ok(HttpStatus.OK);
