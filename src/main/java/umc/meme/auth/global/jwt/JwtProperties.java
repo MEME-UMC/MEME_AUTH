@@ -1,6 +1,5 @@
 package umc.meme.auth.global.jwt;
 
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.beans.factory.InitializingBean;
