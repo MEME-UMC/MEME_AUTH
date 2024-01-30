@@ -45,11 +45,13 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/api/v0/auth/signup").permitAll()
+                                .requestMatchers("/api/v0/auth/model/signup").permitAll()
+                                .requestMatchers("/api/v0/auth/artist/signup").permitAll()
                                 .requestMatchers("/api/v0/auth/login").permitAll()
                                 .requestMatchers("/api/v0/auth/reissue").permitAll()
-                );
+                                .requestMatchers("/api/v0/auth/artist/extra").permitAll()
 
+                );
         http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
