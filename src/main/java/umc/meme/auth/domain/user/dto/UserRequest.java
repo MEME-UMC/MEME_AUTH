@@ -20,7 +20,7 @@ public class UserRequest {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class modelJoinDto {
+    public static class ModelJoinDto {
         private String username;
         private String email;
         private String role;
@@ -34,7 +34,7 @@ public class UserRequest {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class artistJoinDto {
+    public static class ArtistJoinDto {
         private String username;
         private String email;
         private String role;
@@ -45,7 +45,7 @@ public class UserRequest {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class artistExtraDto {
+    public static class ArtistExtraDto {
         private Long artistId;
         private String nickname;
         private String gender;

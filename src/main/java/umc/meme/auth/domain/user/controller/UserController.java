@@ -22,19 +22,19 @@ public class UserController {
 //    }
 
     @PostMapping("/api/v0/auth/model/signup")
-    public ResponseEntity<?> modelSignUp(@RequestBody UserRequest.modelJoinDto joinDto) {
+    public ResponseEntity<?> modelSignUp(@RequestBody UserRequest.ModelJoinDto joinDto) {
         userService.modelSignUp(joinDto);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PostMapping("/api/v0/auth/artist/signup")
-    public ResponseEntity<?> artistSignUp(@RequestBody UserRequest.artistJoinDto joinDto) {
+    public ResponseEntity<?> artistSignUp(@RequestBody UserRequest.ArtistJoinDto joinDto) {
         userService.artistSignUp(joinDto);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PostMapping("/api/v0/auth/artist/extra")
-    public ResponseEntity<?> artistExtra(@RequestBody UserRequest.artistExtraDto joinDto) {
+    public ResponseEntity<?> artistExtra(@RequestBody UserRequest.ArtistExtraDto joinDto) {
         userService.artistExtra(joinDto);
         return ResponseEntity.ok(HttpStatus.OK);
     }

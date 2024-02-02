@@ -10,12 +10,9 @@ import umc.meme.auth.domain.model.domain.Model;
 import umc.meme.auth.domain.model.domain.ModelRepository;
 import umc.meme.auth.domain.model.domain.enums.PersonalColor;
 import umc.meme.auth.domain.model.domain.enums.SkinType;
-import umc.meme.auth.domain.user.domain.UserRepository;
 import umc.meme.auth.domain.user.dto.UserRequest;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.MemberHandler;
-
-import java.util.Optional;
 
 import static umc.meme.auth.global.config.SecurityConfig.*;
 
@@ -27,7 +24,7 @@ public class UserService {
     private final ModelRepository modelRepository;
 
     @Transactional
-    public void modelSignUp(UserRequest.modelJoinDto joinDto) {
+    public void modelSignUp(UserRequest.ModelJoinDto joinDto) {
         modelRepository.save(Model.builder()
                 .email(joinDto.getEmail())
                 .username(joinDto.getUsername())
@@ -42,7 +39,7 @@ public class UserService {
     }
 
     @Transactional
-    public void artistSignUp(UserRequest.artistJoinDto joinDto) {
+    public void artistSignUp(UserRequest.ArtistJoinDto joinDto) {
         artistRepository.save(Artist.builder()
                 .email(joinDto.getEmail())
                 .username(joinDto.getUsername())
@@ -54,7 +51,7 @@ public class UserService {
     }
 
     @Transactional
-    public void artistExtra(UserRequest.artistExtraDto joinDto) {
+    public void artistExtra(UserRequest.ArtistExtraDto joinDto) {
         Artist artist = artistRepository.findById(joinDto.getArtistId()).orElseThrow(() -> new MemberHandler(ErrorStatus.ARTIST_NOT_FOUND));
         artist.update(joinDto);
     }

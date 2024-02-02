@@ -11,7 +11,6 @@ import umc.meme.auth.domain.user.domain.User;
 import umc.meme.auth.domain.user.dto.UserRequest;
 
 import java.util.Date;
-import java.util.List;
 
 @SuperBuilder
 @Getter @Setter
@@ -57,7 +56,7 @@ public class Artist extends User {
 //    @Column(nullable = false)
 //    private List<Category> specialization;
 
-    public void update(UserRequest.artistExtraDto joinDto){
+    public void update(UserRequest.ArtistExtraDto joinDto){
         this.nickname = joinDto.getNickname();
         this.gender = Gender.valueOf(joinDto.getGender());
         this.profileSrc = joinDto.getProfileSrc();
