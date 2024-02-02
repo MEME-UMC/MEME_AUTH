@@ -1,12 +1,13 @@
 package umc.meme.auth.global.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import umc.meme.auth.global.auth.dto.AuthRequest;
-import umc.meme.auth.domain.token.dto.RefreshRequest;
 
 @RequiredArgsConstructor
 @RestController
@@ -20,7 +21,13 @@ public class AuthController {
     }
 
     @PostMapping("/api/v0/auth/reissue")
-    public ResponseEntity<?> reissue(@RequestBody RefreshRequest.TokenDto tokenDto) {
-        return ResponseEntity.ok(authService.reissue(tokenDto));
+    public ResponseEntity<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) {
+        return ResponseEntity.ok(authService.reissue(reissueDto));
+    }
+
+    @PostMapping("/api/v0/auth/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
+        authService.logout(requestAccessTokenDto);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 }

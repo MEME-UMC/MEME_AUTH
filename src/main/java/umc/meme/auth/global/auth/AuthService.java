@@ -59,24 +59,23 @@ public class AuthService {
         String requestRefreshToken = reissueDto.getRefreshToken();
 
         Token requestToken = tokenRepository.findByAccessToken(requestAccessToken)
-                .orElseThrow(() -> new JwtHandler(TOKEN_MISMATCH_EXCEPTION));
+                .orElseThrow(() -> new IllegalArgumentException("TOKEN_MISMATCH_EXCEPTION"));
 
-        if (!requestToken.getRefreshToken().equals(requestRefreshToken)) {
-            Token findToken = tokenRepository.findByAccessToken(requestAccessToken)
-                    .orElseThrow(() -> new JwtHandler(TOKEN_MISMATCH_EXCEPTION));
-            tokenRepository.delete(findToken);
-
+        if (!requestToken.getRefreshToken().equals(requestRefreshToken) || requestToken.getRefreshToken() == null) {
+            deleteRefreshToken(requestAccessToken);
             return new AuthResponse.TokenDto(null, null);
         }
 
+        deleteRefreshToken(requestAccessToken);
         Authentication authentication = jwtTokenProvider.getAuthentication(requestAccessToken);
         UserDetails userDetails = principalDetailsService.loadUserByUsername(authentication.getName());
         return generateToken(userDetails.getUsername(), getAuthorities(authentication));
     }
 
     @Transactional
-    public void logout() {
-
+    public void logout(AuthRequest.AccessTokenDto requestAccessTokenDto) {
+        String requestAccessToken = resolveToken(requestAccessTokenDto.getAccessToken());
+        deleteRefreshToken(requestAccessToken);
     }
 
     private AuthResponse.TokenDto generateToken(String username, String authorities) {
@@ -92,16 +91,22 @@ public class AuthService {
                 .build());
     }
 
-    private String resolveToken(String bearerToken) {
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(7);
-        }
-        return null;
+    private void deleteRefreshToken(String accessToken) {
+        Token findToken = tokenRepository.findByAccessToken(accessToken)
+                .orElseThrow(() -> new JwtHandler(TOKEN_MISMATCH_EXCEPTION));
+        tokenRepository.delete(findToken);
     }
 
     public String getAuthorities(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
+    }
+
+    private String resolveToken(String bearerToken) {
+        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 }
