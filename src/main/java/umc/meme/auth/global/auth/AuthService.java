@@ -8,13 +8,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.meme.auth.domain.user.domain.User;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
 import umc.meme.auth.domain.token.domain.RefreshToken;
 import umc.meme.auth.domain.token.domain.RefreshTokenRepository;
 import umc.meme.auth.domain.token.dto.RefreshRequest;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
+import umc.meme.auth.global.oauth.oAuthService;
 
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -25,15 +28,17 @@ public class AuthService {
     private final PrincipalDetailsService principalDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final oAuthService oAuthService;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
     @Transactional
     public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
         Authentication authentication;
-
         try {
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getEmail()));
+            User userInfo = oAuthService.getUserInfo(loginDto.getAccessToken());
+            System.out.println("userInfo = " + userInfo.getUsername() + " " + userInfo.getEmail());
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (DisabledException exception) {
             throw new DisabledException("DISABLED_EXCEPTION", exception);

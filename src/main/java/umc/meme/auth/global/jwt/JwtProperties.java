@@ -1,6 +1,5 @@
 package umc.meme.auth.global.jwt;
 
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.beans.factory.InitializingBean;
@@ -29,7 +28,6 @@ public class JwtProperties implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 }
