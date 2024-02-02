@@ -86,6 +86,8 @@ jobs:
           script: |
             # Docker 이미지 다운로드
             sudo docker pull ${{ secrets.DOCKER_REPO }}/meme-auth
+            sudo docker pull ${{ secrets.DOCKER_REPO }}/meme-service
+            
             
             # Docker Compose 실행
             sudo docker-compose up -d
