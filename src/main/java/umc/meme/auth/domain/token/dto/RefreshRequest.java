@@ -6,10 +6,5 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 public class RefreshRequest {
-    @Data @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class TokenDto {
-        private String refreshToken;
-    }
+
 }

@@ -55,8 +55,8 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse.TokenDto reissue(RefreshRequest.TokenDto tokenDto) {
-        String requestRefreshToken = tokenDto.getRefreshToken();
+    public AuthResponse.TokenDto reissue(AuthRequest.RefreshTokenDto requestRefreshTokenDto) {
+        String requestRefreshToken = requestRefreshTokenDto.getRefreshToken();
         RefreshToken refreshToken = refreshTokenRepository.findById(requestRefreshToken)
                 .orElseThrow(() -> new IllegalArgumentException("No Refresh Token"));
 
