@@ -38,7 +38,8 @@ public enum ErrorStatus implements BaseErrorCode {
     JWT_PAYLOAD_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "Payload 정보가 일치하지 않습니다."),
     JWT_EXPIRED_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "JWT 토큰이 만료되었습니다."),
 
-    NO_PUBLIC_KEY_EXCEPTION(HttpStatus.NOT_FOUND, 401, "일치하는 공개 키가 없습니다.");
+    NO_PUBLIC_KEY_EXCEPTION(HttpStatus.NOT_FOUND, 401, "일치하는 공개 키가 없습니다."),
+    TOKEN_MISMATCH_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "사용자가 일치하지 않습니다");
 
 
     private final HttpStatus httpStatus;

@@ -12,7 +12,15 @@ public class AuthRequest {
     public static class LoginDto {
         private String username;
         private String email;
-        private String idToken;
+        private String id_token;
+    }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReissueDto {
+        private String accessToken;
+        private String refreshToken;
     }
 
     @Data @Builder
