@@ -61,7 +61,12 @@ public class AuthService {
         Token requestToken = tokenRepository.findByAccessToken(requestAccessToken)
                 .orElseThrow(() -> new IllegalArgumentException("TOKEN_MISMATCH_EXCEPTION"));
 
-        if (!requestToken.getRefreshToken().equals(requestRefreshToken) || requestToken.getRefreshToken() == null) {
+        if (requestToken.getRefreshToken() == null) {
+            deleteRefreshToken(requestAccessToken);
+            return new AuthResponse.TokenDto(null, null);
+        }
+
+        if (requestToken.getRefreshToken() != requestRefreshToken) {
             deleteRefreshToken(requestAccessToken);
             return new AuthResponse.TokenDto(null, null);
         }

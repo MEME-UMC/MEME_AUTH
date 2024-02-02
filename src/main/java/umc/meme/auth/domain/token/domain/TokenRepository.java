@@ -4,7 +4,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -29,14 +28,10 @@ public class TokenRepository {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String refreshToken = valueOperations.get(accessToken);
 
-        if (Objects.isNull(accessToken)) {
-            return Optional.empty();
-        }
-
         return Optional.of(new Token(accessToken, refreshToken));
     }
 
-    public void delete(Token token){
+    public void delete(Token token) {
         redisTemplate.delete(token.getAccessToken());
     }
 }
