@@ -15,9 +15,9 @@ import umc.meme.auth.domain.token.domain.RefreshToken;
 import umc.meme.auth.domain.token.domain.RefreshTokenRepository;
 import umc.meme.auth.domain.token.dto.RefreshRequest;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
+import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
 import umc.meme.auth.global.oauth.oAuthService;
 
-import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -28,7 +28,7 @@ public class AuthService {
     private final PrincipalDetailsService principalDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final oAuthService oAuthService;
+    private final KakaoAuthService kakaoAuthService;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
@@ -36,7 +36,8 @@ public class AuthService {
     public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
         Authentication authentication;
         try {
-            User userInfo = oAuthService.getUserInfo(loginDto.getAccessToken());
+            User userInfo = kakaoAuthService.getUserInfo(loginDto.getIdToken());
+            // User userInfo = oAuthService.getUserInfo(loginDto.getIdToken());
             System.out.println("userInfo = " + userInfo.getUsername() + " " + userInfo.getEmail());
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
