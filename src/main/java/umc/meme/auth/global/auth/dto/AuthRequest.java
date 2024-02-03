@@ -10,8 +10,28 @@ public class AuthRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoginDto {
-        private String username;
-        private String email;
+        private String id_token;
+    }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ReissueDto {
         private String accessToken;
+        private String refreshToken;
+    }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AccessTokenDto {
+        private String accessToken;
+    }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RefreshTokenDto {
+        private String refreshToken;
     }
 }

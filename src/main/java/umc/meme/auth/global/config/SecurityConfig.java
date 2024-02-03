@@ -50,7 +50,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v0/auth/login").permitAll()
                                 .requestMatchers("/api/v0/auth/reissue").permitAll()
                                 .requestMatchers("/api/v0/auth/artist/extra").permitAll()
-
+                                .requestMatchers("/api/v0/auth/logout").permitAll()
                 );
         http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
