@@ -52,32 +52,7 @@ jobs:
               sudo docker rmi -f $(sudo docker images -aq)
             fi
 
-      - name: Copy file to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ec2-user
-          key: ${{ secrets.KEY }}
-          source: ./docker-compose.yaml
-          target: /home/ec2-user/
-
-#      - name: Create and Copy .env File to EC2
-#        uses: appleboy/ssh-action@v0.1.6
-#        with:
-#          host: ${{ secrets.HOST }}
-#          username: ec2-user
-#          key: ${{ secrets.KEY }}
-#          script: |
-#            # Create .env file
-#            echo "DB_URL=${{ secrets.DB_URL }}" > ~/.env
-#            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ~/.env
-#            echo "DB_PASS=${{ secrets.DB_PASS }}" >> ~/.env
-#
-#            # Copy .env file to the project directory
-#            #cp ~/.env /home/ec2-user/.env
-
-      ## docker compose up
-      - name: Docker Compose on EC2
+      - name: Docker Run on EC2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -86,12 +61,8 @@ jobs:
           script: |
             # Docker 이미지 다운로드
             sudo docker pull ${{ secrets.DOCKER_REPO }}/meme-auth
-            sudo docker pull ${{ secrets.DOCKER_REPO }}/meme-service
-            
-            
-            # Docker Compose 실행
-            sudo docker-compose up -d
-            sudo docker-compose logs -f
+                    
+            docker run -d --rm --name server -p 8080:8080 ${{ secrets.DOCKER_REPO }}/meme-auth
             
             # 사용하지 않는 Docker 이미지 정리
             sudo docker image prune -f
