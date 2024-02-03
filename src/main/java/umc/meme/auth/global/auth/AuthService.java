@@ -15,6 +15,7 @@ import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
 import umc.meme.auth.global.exception.handler.JwtHandler;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
+import umc.meme.auth.global.oauth.apple.AppleAuthService;
 import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
 
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenRepository tokenRepository;
     private final KakaoAuthService kakaoAuthService;
+    private final AppleAuthService appleAuthService;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
@@ -37,9 +39,17 @@ public class AuthService {
     public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
         String userName;
         Authentication authentication;
-
         try {
+            // Design Pattern 적용해보기
             User userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
+//            if (loginDto.getProvider().equals("KAKAO")) {
+//                userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
+//            } else if (loginDto.getProvider().equals("APPLE")) {
+//                // userInfo = appleAuthService.getUserInfo(loginDto.getId_token());
+//            } else {
+//                throw new IllegalArgumentException("Cannot find provider : " + loginDto.getProvider());
+//            }
+
             userName = userInfo.getUsername();
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -89,8 +99,7 @@ public class AuthService {
 
     @Transactional
     public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        logout();
-
+        // logout();
         // user 테이블에서 계정 삭제하기
     }
 

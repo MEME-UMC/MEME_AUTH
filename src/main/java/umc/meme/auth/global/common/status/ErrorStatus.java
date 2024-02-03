@@ -39,7 +39,8 @@ public enum ErrorStatus implements BaseErrorCode {
     JWT_EXPIRED_TOKEN_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "JWT 토큰이 만료되었습니다."),
 
     NO_PUBLIC_KEY_EXCEPTION(HttpStatus.NOT_FOUND, 401, "일치하는 공개 키가 없습니다."),
-    TOKEN_MISMATCH_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "사용자가 일치하지 않습니다");
+    TOKEN_MISMATCH_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "사용자가 일치하지 않습니다"),
+    INVALID_SIGNATURE_EXCEPTION(HttpStatus.BAD_REQUEST,400,"잘못된 JWT 서명입니다.");
 
 
     private final HttpStatus httpStatus;

@@ -11,6 +11,7 @@ public class AuthRequest {
     @AllArgsConstructor
     public static class LoginDto {
         private String id_token;
+        private String provider;
     }
 
     @Data @Builder

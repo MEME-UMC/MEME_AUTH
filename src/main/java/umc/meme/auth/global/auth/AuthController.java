@@ -33,6 +33,6 @@ public class AuthController {
 
     @PostMapping("/api/v0/auth/withdraw")
     public ResponseEntity<?> withdraw(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        authService
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 }
