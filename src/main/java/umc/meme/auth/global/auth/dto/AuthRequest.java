@@ -12,6 +12,6 @@ public class AuthRequest {
     public static class LoginDto {
         private String username;
         private String email;
-//        private String accessToken;
+        private String accessToken;
     }
 }

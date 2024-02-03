@@ -36,9 +36,9 @@ public class AuthService {
     public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
         Authentication authentication;
         try {
-            //User userInfo = oAuthService.getUserInfo(loginDto.getAccessToken());
-            //System.out.println("userInfo = " + userInfo.getUsername() + " " + userInfo.getEmail());
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getEmail()));
+            User userInfo = oAuthService.getUserInfo(loginDto.getAccessToken());
+            System.out.println("userInfo = " + userInfo.getUsername() + " " + userInfo.getEmail());
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (DisabledException exception) {
             throw new DisabledException("DISABLED_EXCEPTION", exception);
