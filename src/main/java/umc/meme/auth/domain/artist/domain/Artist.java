@@ -47,14 +47,6 @@ public class Artist extends User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
     private AvailableTime availableTime;
-//
-//    //    @Enumerated(EnumType.STRING)
-////    @Column(nullable = false)
-//    private List<Region> region;
-
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
-//    private List<Category> specialization;
 
     public void update(UserRequest.ArtistExtraDto joinDto){
         this.nickname = joinDto.getNickname();

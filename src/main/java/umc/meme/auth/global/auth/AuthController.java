@@ -30,4 +30,9 @@ public class AuthController {
         authService.logout(requestAccessTokenDto);
         return ResponseEntity.ok(HttpStatus.OK);
     }
+
+    @PostMapping("/api/v0/auth/withdraw")
+    public ResponseEntity<?> withdraw(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
+        authService
+    }
 }

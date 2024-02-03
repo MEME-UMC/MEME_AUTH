@@ -35,9 +35,12 @@ public class AuthService {
 
     @Transactional
     public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
+        String userName;
         Authentication authentication;
+
         try {
             User userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
+            userName = userInfo.getUsername();
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (DisabledException exception) {
@@ -48,7 +51,7 @@ public class AuthService {
             throw new BadCredentialsException("BAD_CREDENTIALS_EXCEPTION", exception);
         }
 
-        UserDetails userDetails = principalDetailsService.loadUserByUsername(loginDto.getUsername());
+        UserDetails userDetails = principalDetailsService.loadUserByUsername(userName);
         AuthResponse.TokenDto tokenDto = generateToken(userDetails.getUsername(), getAuthorities(authentication));
         return tokenDto;
     }
@@ -66,7 +69,7 @@ public class AuthService {
             return new AuthResponse.TokenDto(null, null);
         }
 
-        if (requestToken.getRefreshToken() != requestRefreshToken) {
+        if (!requestToken.getRefreshToken().equals(requestRefreshToken)) {
             deleteRefreshToken(requestAccessToken);
             return new AuthResponse.TokenDto(null, null);
         }
@@ -81,6 +84,14 @@ public class AuthService {
     public void logout(AuthRequest.AccessTokenDto requestAccessTokenDto) {
         String requestAccessToken = resolveToken(requestAccessTokenDto.getAccessToken());
         deleteRefreshToken(requestAccessToken);
+        SecurityContextHolder.clearContext();
+    }
+
+    @Transactional
+    public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
+        logout();
+
+        // user 테이블에서 계정 삭제하기
     }
 
     private AuthResponse.TokenDto generateToken(String username, String authorities) {

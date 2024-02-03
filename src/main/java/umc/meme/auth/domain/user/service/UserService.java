@@ -24,8 +24,8 @@ public class UserService {
     private final ModelRepository modelRepository;
 
     @Transactional
-    public void modelSignUp(UserRequest.ModelJoinDto joinDto) {
-        modelRepository.save(Model.builder()
+    public Long modelSignUp(UserRequest.ModelJoinDto joinDto) {
+        return modelRepository.save(Model.builder()
                 .email(joinDto.getEmail())
                 .username(joinDto.getUsername())
                 .password(passwordEncoder().encode(joinDto.getEmail()))
@@ -35,49 +35,24 @@ public class UserService {
                 .profileImg(joinDto.getProfileSrc())
                 .skinType(SkinType.valueOf(joinDto.getSkinType()))
                 .personalColor(PersonalColor.valueOf(joinDto.getPersonalColor()))
-                .build());
+                .build()).getUserid();
     }
 
     @Transactional
-    public void artistSignUp(UserRequest.ArtistJoinDto joinDto) {
-        artistRepository.save(Artist.builder()
+    public Long artistSignUp(UserRequest.ArtistJoinDto joinDto) {
+        return artistRepository.save(Artist.builder()
                 .email(joinDto.getEmail())
                 .username(joinDto.getUsername())
                 .password(passwordEncoder().encode(joinDto.getEmail()))
                 .role("ARTIST")
                 .nickname(joinDto.getNickname())
                 .profileSrc(joinDto.getProfileSrc())
-                .build());
+                .build()).getUserid();
     }
 
     @Transactional
     public void artistExtra(UserRequest.ArtistExtraDto joinDto) {
-        Artist artist = artistRepository.findById(joinDto.getArtistId()).orElseThrow(() -> new MemberHandler(ErrorStatus.ARTIST_NOT_FOUND));
+        Artist artist = artistRepository.findById(joinDto.getUserId()).orElseThrow(() -> new MemberHandler(ErrorStatus.ARTIST_NOT_FOUND));
         artist.update(joinDto);
     }
-
-//    @Transactional
-//    public void signup(UserRequest.JoinDto joinDto) {
-//        switch (joinDto.getRole()) {
-//            case "ARTIST":
-//                artistRepository.save(Artist.builder()
-//                        .email(joinDto.getEmail())
-//                        .username(joinDto.getUsername())
-//                        .password(passwordEncoder().encode(joinDto.getEmail()))
-//                        .role("ARTIST")
-//                        .build());
-//                break;
-//            case "MODEL":
-//                modelRepository.save(Model.builder()
-//                        .email(joinDto.getEmail())
-//                        .username(joinDto.getUsername())
-//                        .password(passwordEncoder().encode(joinDto.getEmail()))
-//                        .role("model")
-//                        .build());
-//                break;
-//            default:
-//                throw new IllegalArgumentException("ROLE_TYPE_MISMATCH");
-//        }
-//    }
-
 }

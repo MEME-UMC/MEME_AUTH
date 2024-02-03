@@ -11,15 +11,6 @@ public class UserRequest {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class JoinDto {
-        private String username;
-        private String email;
-        private String role;
-    }
-
-    @Data @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ModelJoinDto {
         private String username;
         private String email;
@@ -29,6 +20,7 @@ public class UserRequest {
         private String gender;
         private String skinType;
         private String personalColor;
+        private String provider;
     }
 
     @Data @Builder
@@ -40,22 +32,21 @@ public class UserRequest {
         private String role;
         private String profileSrc;
         private String nickname;
+        private String provider;
     }
 
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ArtistExtraDto {
-        private Long artistId;
+        private Long userId;
+        private String profileSrc;
         private String nickname;
         private String gender;
-        private String profileSrc;
         private String introduction;
         private String workExperience;
         private String makeupLocation;
         private String availableTime;
         private List<String> region;
-
-//        private List<Category> specialization;
     }
 }

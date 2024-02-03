@@ -10,8 +10,6 @@ public class AuthRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class LoginDto {
-        private String username;
-        private String email;
         private String id_token;
     }
 

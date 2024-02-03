@@ -15,22 +15,14 @@ public class UserController {
 
     private final UserService userService;
 
-//    @PostMapping("/api/v0/auth/signup")
-//    public ResponseEntity<?> signup(@RequestBody UserRequest.JoinDto joinDto) {
-//        userService.signup(joinDto);
-//        return ResponseEntity.ok(HttpStatus.OK);
-//    }
-
     @PostMapping("/api/v0/auth/model/signup")
     public ResponseEntity<?> modelSignUp(@RequestBody UserRequest.ModelJoinDto joinDto) {
-        userService.modelSignUp(joinDto);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok(userService.modelSignUp(joinDto));
     }
 
     @PostMapping("/api/v0/auth/artist/signup")
     public ResponseEntity<?> artistSignUp(@RequestBody UserRequest.ArtistJoinDto joinDto) {
-        userService.artistSignUp(joinDto);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return ResponseEntity.ok(userService.artistSignUp(joinDto));
     }
 
     @PostMapping("/api/v0/auth/artist/extra")
