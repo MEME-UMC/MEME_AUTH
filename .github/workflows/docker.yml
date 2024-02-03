@@ -3,7 +3,7 @@ name: main Workflow
 on:
   push:
     branches:
-      - ci/#9
+      - develop
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -62,7 +62,7 @@ jobs:
             # Docker 이미지 다운로드
             sudo docker pull ${{ secrets.DOCKER_REPO }}/meme-auth
                     
-            docker run -d --rm --name server -p 8080:8080 ${{ secrets.DOCKER_REPO }}/meme-auth
+            docker run -d --rm --name server -p 8080:8080 sunwupark/meme-auth
             
             # 사용하지 않는 Docker 이미지 정리
             sudo docker image prune -f
