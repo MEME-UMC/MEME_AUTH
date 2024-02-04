@@ -3,18 +3,24 @@ package umc.meme.auth.domain.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.meme.auth.domain.artist.domain.Artist;
-import umc.meme.auth.domain.artist.domain.ArtistRepository;
-import umc.meme.auth.domain.artist.domain.enums.Gender;
-import umc.meme.auth.domain.model.domain.Model;
-import umc.meme.auth.domain.model.domain.ModelRepository;
-import umc.meme.auth.domain.model.domain.enums.PersonalColor;
-import umc.meme.auth.domain.model.domain.enums.SkinType;
+import umc.meme.auth.domain.artist.entity.Artist;
+import umc.meme.auth.domain.artist.entity.ArtistRepository;
+import umc.meme.auth.domain.artist.entity.enums.Gender;
+import umc.meme.auth.domain.model.entity.Model;
+import umc.meme.auth.domain.model.entity.ModelRepository;
+import umc.meme.auth.domain.model.entity.enums.PersonalColor;
+import umc.meme.auth.domain.model.entity.enums.SkinType;
 import umc.meme.auth.domain.user.dto.UserRequest;
 import umc.meme.auth.global.common.status.ErrorStatus;
+import umc.meme.auth.global.config.SecurityConfig;
+import umc.meme.auth.global.enums.Provider;
+import umc.meme.auth.global.enums.UserStatus;
 import umc.meme.auth.global.exception.handler.MemberHandler;
 
+import java.time.LocalDate;
+
 import static umc.meme.auth.global.config.SecurityConfig.*;
+import static umc.meme.auth.global.enums.UserStatus.ACTIVE;
 
 @RequiredArgsConstructor
 @Service
@@ -27,32 +33,39 @@ public class UserService {
     public Long modelSignUp(UserRequest.ModelJoinDto joinDto) {
         return modelRepository.save(Model.builder()
                 .email(joinDto.getEmail())
+                .provider(joinDto.getProvider())
+                .profileImg(joinDto.getProfileImg())
                 .username(joinDto.getUsername())
+                .nickname(joinDto.getNickname())
+                .gender(joinDto.getGender())
+                .skinType(joinDto.getSkinType())
+                .personalColor(joinDto.getPersonalColor())
                 .password(passwordEncoder().encode(joinDto.getEmail()))
                 .role("MODEL")
-                .gender(Gender.valueOf(joinDto.getGender()))
-                .nickname(joinDto.getNickname())
-                .profileImg(joinDto.getProfileSrc())
-                .skinType(SkinType.valueOf(joinDto.getSkinType()))
-                .personalColor(PersonalColor.valueOf(joinDto.getPersonalColor()))
-                .build()).getUserid();
+                .userStatus(ACTIVE)
+                .inactiveDate(LocalDate.of(2099, 12, 31))
+                .build()).getUserId();
     }
 
     @Transactional
     public Long artistSignUp(UserRequest.ArtistJoinDto joinDto) {
         return artistRepository.save(Artist.builder()
                 .email(joinDto.getEmail())
+                .provider(joinDto.getProvider())
+                .profileImg(joinDto.getProfileImg())
                 .username(joinDto.getUsername())
+                .nickname(joinDto.getNickname())
                 .password(passwordEncoder().encode(joinDto.getEmail()))
                 .role("ARTIST")
-                .nickname(joinDto.getNickname())
-                .profileSrc(joinDto.getProfileSrc())
-                .build()).getUserid();
+                .userStatus(ACTIVE)
+                .inactiveDate(LocalDate.of(2099, 12, 31))
+                .build()).getUserId();
     }
 
     @Transactional
     public void artistExtra(UserRequest.ArtistExtraDto joinDto) {
-        Artist artist = artistRepository.findById(joinDto.getUserId()).orElseThrow(() -> new MemberHandler(ErrorStatus.ARTIST_NOT_FOUND));
+        Artist artist = artistRepository.findById(joinDto.getUserId())
+                .orElseThrow(() -> new MemberHandler(ErrorStatus.ARTIST_NOT_FOUND));
         artist.update(joinDto);
     }
 }

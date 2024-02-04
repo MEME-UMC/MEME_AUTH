@@ -1,6 +1,7 @@
 package umc.meme.auth.global.oauth.kakao;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -59,7 +60,8 @@ public class KakaoAuthService {
         String decodedHeader = new String(Decoders.BASE64.decode(header));
 
         JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(decodedHeader.toString());
+        // JsonElement element = parser.parse(decodedHeader.toString());
+        JsonElement element = JsonParser.parseString(decodedHeader.toString());
 
         String kid = element.getAsJsonObject().get("kid").getAsString();
         JWK publicKey = keyRepository.findByKid(kid)

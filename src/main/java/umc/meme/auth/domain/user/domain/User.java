@@ -1,16 +1,21 @@
 package umc.meme.auth.domain.user.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.ColumnDefault;
+import umc.meme.auth.domain.artist.entity.enums.Gender;
+import umc.meme.auth.global.enums.Provider;
+import umc.meme.auth.global.enums.UserStatus;
 
-@SuperBuilder
-@Getter
-@AllArgsConstructor
+import java.time.LocalDate;
+
+@SuperBuilder @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn
 @Entity
@@ -18,16 +23,41 @@ public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long userid;
+    private Long userId;
 
-    @Column(name = "username", nullable = true, unique = true)
+    @NotNull
+    protected String profileImg;
+
+    @NotNull
+    @Column(length = 40)
+    protected String nickname;
+
+    @NotNull
+    @Column(unique = true, length = 20)
     private String username;
 
-    @Column(name = "email")
+    @NotNull
+    @Column(length = 40)
     private String email;
 
-    @Column(name = "password")
+    @NotNull
     private String password;
 
+    @NotNull
     private String role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private Gender gender;
+
+    @Column(nullable = true)
+    private LocalDate inactiveDate;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private UserStatus userStatus;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    private Provider provider;
 }

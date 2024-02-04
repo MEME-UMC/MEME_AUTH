@@ -49,8 +49,9 @@ public class AppleAuthService {
         // 헤더를 Base64 방식으로 디코딩
         String decodedHeader = new String(Decoders.BASE64.decode(header));
 
-        JsonParser parser = new JsonParser();
-        JsonElement element = parser.parse(decodedHeader.toString());
+        // JsonParser parser = new JsonParser();
+        // JsonElement element = parser.parse(decodedHeader.toString());
+        JsonElement element = JsonParser.parseString(decodedHeader.toString());
 
         String kid = element.getAsJsonObject().get("kid").getAsString();
         JWK publicKey = keyRepository.findByKid(kid)

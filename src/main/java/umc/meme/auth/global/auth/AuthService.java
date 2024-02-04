@@ -40,16 +40,7 @@ public class AuthService {
         String userName;
         Authentication authentication;
         try {
-            // Design Pattern 적용해보기
             User userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
-//            if (loginDto.getProvider().equals("KAKAO")) {
-//                userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
-//            } else if (loginDto.getProvider().equals("APPLE")) {
-//                // userInfo = appleAuthService.getUserInfo(loginDto.getId_token());
-//            } else {
-//                throw new IllegalArgumentException("Cannot find provider : " + loginDto.getProvider());
-//            }
-
             userName = userInfo.getUsername();
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
