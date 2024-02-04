@@ -87,12 +87,12 @@ public class AuthService {
         SecurityContextHolder.clearContext();
     }
 
-    @Transactional
-    public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        logout();
-
-        // user 테이블에서 계정 삭제하기
-    }
+//    @Transactional
+//    public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
+//        logout();
+//
+//        // user 테이블에서 계정 삭제하기
+//    }
 
     private AuthResponse.TokenDto generateToken(String username, String authorities) {
         AuthResponse.TokenDto tokenDto = jwtTokenProvider.createToken(username, authorities);
