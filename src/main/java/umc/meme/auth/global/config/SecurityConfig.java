@@ -47,11 +47,13 @@ public class SecurityConfig {
                         authorizeHttpRequests
                                 .requestMatchers("/api/v0/auth/model/signup").permitAll()
                                 .requestMatchers("/api/v0/auth/artist/signup").permitAll()
-                                .requestMatchers("/api/v0/auth/login").permitAll()
-                                .requestMatchers("/api/v0/auth/reissue").permitAll()
                                 .requestMatchers("/api/v0/auth/artist/extra").permitAll()
+                                .requestMatchers("/api/v0/auth/login").permitAll()
                                 .requestMatchers("/api/v0/auth/logout").permitAll()
+                                .requestMatchers("/api/v0/auth/withdraw").permitAll()
+                                .requestMatchers("/api/v0/auth/reissue").permitAll()
                 );
+
         http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

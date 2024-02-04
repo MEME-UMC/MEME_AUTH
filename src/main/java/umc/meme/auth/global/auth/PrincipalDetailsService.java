@@ -17,8 +17,6 @@ import umc.meme.auth.global.exception.handler.MemberHandler;
 public class PrincipalDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
-    private final ArtistRepository artistRepository;
-    private final ModelRepository modelRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
