@@ -20,7 +20,7 @@ jobs:
         run: |
           mkdir -p src/main/resources
           echo "${{ secrets.MAIN_DATABASE_YML }}" | base64 --decode > src/main/resources/application.yml
-          echo "${{ secrets.SQL_FILE }}" | base64 --decode > src/main/resources/data.sql
+          echo "${{ secrets.SQL_FILE }}" > src/main/resources/data.sql
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
