@@ -52,6 +52,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v0/auth/logout").permitAll()
                                 .requestMatchers("/api/v0/auth/withdraw").permitAll()
                                 .requestMatchers("/api/v0/auth/reissue").permitAll()
+                                .requestMatchers("/auth/**").permitAll()
                 );
 
         http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
