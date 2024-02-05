@@ -1,4 +1,4 @@
-package umc.meme.auth.domain.model.domain.enums;
+package umc.meme.auth.domain.model.entity.enums;
 
 public enum SkinType {
     DRY, COMMON, OILY, COMBINATIONAL

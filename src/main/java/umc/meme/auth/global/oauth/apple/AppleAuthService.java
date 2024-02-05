@@ -1,18 +1,14 @@
-package umc.meme.auth.global.oauth.kakao;
+package umc.meme.auth.global.oauth.apple;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.SignatureException;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.meme.auth.domain.user.domain.User;
 import umc.meme.auth.domain.user.domain.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.JwtHandler;
@@ -31,26 +27,20 @@ import static umc.meme.auth.global.common.status.ErrorStatus.NO_PUBLIC_KEY_EXCEP
 
 @RequiredArgsConstructor
 @Service
-public class KakaoAuthService {
+public class AppleAuthService {
 
     private final UserRepository userRepository;
     private final JWKRepository keyRepository;
 
-    @Value("${spring.security.oauth2.kakao.issuer}")
+    @Value("${spring.security.oauth2.apple.issuer}")
     private String issuer;
 
-    @Value("${spring.security.oauth2.kakao.rest-api-key}")
+    @Value("${spring.security.oauth2.apple.client-id}")
     private String restApiKey;
 
     @Transactional
-    public User getUserInfo(String idToken) {
-        String userEmail = validateIdToken(idToken);
-
-        if (userEmail == null)
-            throw new ValidationException("Validation Exception");
-
-        return userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new EntityNotFoundException("Email not found: " + userEmail));
+    public void getUserInfo(String idToken) {
+        validateIdToken(idToken);
     }
 
     private String validateIdToken(String idToken) {
@@ -59,7 +49,7 @@ public class KakaoAuthService {
         // 헤더를 Base64 방식으로 디코딩
         String decodedHeader = new String(Decoders.BASE64.decode(header));
 
-        JsonParser parser = new JsonParser();
+        // JsonParser parser = new JsonParser();
         // JsonElement element = parser.parse(decodedHeader.toString());
         JsonElement element = JsonParser.parseString(decodedHeader.toString());
 

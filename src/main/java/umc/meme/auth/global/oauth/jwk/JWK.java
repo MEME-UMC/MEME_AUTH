@@ -1,4 +1,4 @@
-package umc.meme.auth.global.oauth.kakao.jwk;
+package umc.meme.auth.global.oauth.jwk;
 
 import jakarta.persistence.*;
 import lombok.Getter;

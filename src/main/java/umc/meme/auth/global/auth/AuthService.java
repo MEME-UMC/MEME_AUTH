@@ -6,15 +6,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.meme.auth.domain.token.domain.Token;
 import umc.meme.auth.domain.token.domain.TokenRepository;
 import umc.meme.auth.domain.user.domain.User;
+import umc.meme.auth.domain.user.domain.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
 import umc.meme.auth.global.exception.handler.JwtHandler;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
+import umc.meme.auth.global.oauth.apple.AppleAuthService;
 import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
 
 import java.util.stream.Collectors;
@@ -30,6 +33,8 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenRepository tokenRepository;
     private final KakaoAuthService kakaoAuthService;
+    private final AppleAuthService appleAuthService;
+    private final UserRepository userRepository;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
@@ -37,7 +42,6 @@ public class AuthService {
     public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
         String userName;
         Authentication authentication;
-
         try {
             User userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
             userName = userInfo.getUsername();
@@ -87,12 +91,15 @@ public class AuthService {
         SecurityContextHolder.clearContext();
     }
 
-//    @Transactional
-//    public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
-//        logout();
-//
-//        // user 테이블에서 계정 삭제하기
-//    }
+    @Transactional
+    public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
+        logout(requestAccessTokenDto);
+        String requestAccessToken = resolveToken(requestAccessTokenDto.getAccessToken());
+        String username = (String) jwtTokenProvider.getClaims(requestAccessToken).get("username");
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+        userRepository.delete(user);
+    }
 
     private AuthResponse.TokenDto generateToken(String username, String authorities) {
         AuthResponse.TokenDto tokenDto = jwtTokenProvider.createToken(username, authorities);

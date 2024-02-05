@@ -1,4 +1,4 @@
-package umc.meme.auth.domain.artist.domain.enums;
+package umc.meme.auth.domain.artist.entity.enums;
 
 public enum WorkExperience {
     ONE, TWO, THREE, FOUR,

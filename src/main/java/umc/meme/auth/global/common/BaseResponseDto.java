@@ -4,28 +4,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.common.status.SuccessStatus;
 
 @Getter
 @AllArgsConstructor
-@JsonPropertyOrder({"success", "code", "message", "result"})
+@JsonPropertyOrder({"code", "result", "message", "data"})
 public class BaseResponseDto<T> {
-    private final boolean success;
+
     private final int code;
+    private final String result;
     private final String message;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private T result;
+    private final T data;
 
     // 성공한 경우 응답 생성
-    public static <T> BaseResponseDto<T> onSuccess(T data){
-        return new BaseResponseDto<>(true, SuccessStatus._OK.getCode(), SuccessStatus._OK.getMessage(), data);
+    public static <T>BaseResponseDto<T> SuccessResponse(SuccessStatus status, T data) {
+        return new BaseResponseDto<>(status.getCode(), "SUCCESS", status.getMessage(), data);
     }
-    public static <T> BaseResponseDto<T> of(String message, int code, T data){
-        return new BaseResponseDto<>(true, code, message, data);
+    public static BaseResponseDto SuccessResponse(SuccessStatus status) {
+        return new BaseResponseDto<>(status.getCode(), "SUCCESS", status.getMessage(), "");
     }
 
-    // 실패한 경우 응답 생성
-    public static <T> BaseResponseDto<T> onFailure(String message, int code, T data) {
-        return new BaseResponseDto<>(false, code, message, data);
+    public static BaseResponseDto ErrorResponse(ErrorStatus status) {
+        return new BaseResponseDto<>(status.getCode(), "FAILURE", status.getMessage(), "");
     }
 }

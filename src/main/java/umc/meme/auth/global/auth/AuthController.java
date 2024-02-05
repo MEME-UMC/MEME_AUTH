@@ -1,14 +1,15 @@
 package umc.meme.auth.global.auth;
 
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import umc.meme.auth.global.auth.dto.AuthRequest;
+import umc.meme.auth.global.auth.dto.AuthResponse;
+import umc.meme.auth.global.common.BaseResponseDto;
+import umc.meme.auth.global.common.status.ErrorStatus;
+import umc.meme.auth.global.common.status.SuccessStatus;
 
 @RequiredArgsConstructor
 @RestController
@@ -16,27 +17,30 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(summary = "소셜 로그인", description = "소셜 로그인할때 사용하는 API입니다.")
     @PostMapping("/api/v0/auth/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest.LoginDto loginDto) {
-        return ResponseEntity.ok(authService.login(loginDto));
+    public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) {
+        return BaseResponseDto.SuccessResponse(SuccessStatus.LOGIN_SUCCESS, authService.login(loginDto));
     }
 
-    @Operation(summary = "토큰 재발급", description = "토큰이 만료가 되었을때 재발급을 받는 API입니다")
     @PostMapping("/api/v0/auth/reissue")
-    public ResponseEntity<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) {
-        return ResponseEntity.ok(authService.reissue(reissueDto));
+    public BaseResponseDto<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) {
+        AuthResponse.TokenDto reissueResult = authService.reissue(reissueDto);
+
+        if (reissueResult.getAccessToken() == null)
+            return BaseResponseDto.ErrorResponse(ErrorStatus.CANNOT_REISSUE_JWT_TOKEN);
+
+        return BaseResponseDto.SuccessResponse(SuccessStatus.REISSUE_SUCCESS, reissueResult);
     }
 
-    @Operation(summary = "로그아웃", description = "로그아웃하는 API입니다")
     @PostMapping("/api/v0/auth/logout")
-    public ResponseEntity<?> logout(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
+    public BaseResponseDto<?> logout(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
         authService.logout(requestAccessTokenDto);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return BaseResponseDto.SuccessResponse(SuccessStatus.LOGOUT_SUCCESS);
     }
 
-//    @PostMapping("/api/v0/auth/withdraw")
-//    public ResponseEntity<?> withdraw(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
-//        authService
-//    }
+    @PostMapping("/api/v0/auth/withdraw")
+    public BaseResponseDto<?> withdraw(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
+        authService.withdraw(requestAccessTokenDto);
+        return BaseResponseDto.SuccessResponse(SuccessStatus.WITHDRAW_SUCCESS);
+    }
 }

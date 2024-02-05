@@ -4,35 +4,48 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import umc.meme.auth.domain.artist.entity.enums.*;
+import umc.meme.auth.domain.model.entity.enums.PersonalColor;
+import umc.meme.auth.domain.model.entity.enums.SkinType;
+import umc.meme.auth.global.enums.DayOfWeek;
+import umc.meme.auth.global.enums.Provider;
+import umc.meme.auth.global.enums.Times;
 
 import java.util.List;
+import java.util.Map;
 
 public class UserRequest {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ModelJoinDto {
-        private String username;
+        // OAuth
         private String email;
-        private String role;
-        private String profileSrc;
+        private Provider provider;
+
+        // User
+        private String profileImg;
+        private String username;
         private String nickname;
-        private String gender;
-        private String skinType;
-        private String personalColor;
-        private String provider;
+
+        // Model
+        private Gender gender;
+        private SkinType skinType;
+        private PersonalColor personalColor;
     }
 
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ArtistJoinDto {
-        private String username;
+        // OAuth
         private String email;
-        private String role;
-        private String profileSrc;
+        private Provider provider;
+
+        // User
+        private String profileImg;
+        private String username;
         private String nickname;
-        private String provider;
     }
 
     @Data @Builder
@@ -40,13 +53,16 @@ public class UserRequest {
     @AllArgsConstructor
     public static class ArtistExtraDto {
         private Long userId;
-        private String profileSrc;
+
+        private String profileImg;
         private String nickname;
-        private String gender;
         private String introduction;
-        private String workExperience;
-        private String makeupLocation;
-        private String availableTime;
-        private List<String> region;
+        private WorkExperience workExperience;
+
+        private List<Region> region;
+        private List<Category> specialization;
+        private MakeupLocation makeupLocation;
+        private String shopLocation;
+        private Map<DayOfWeek, Times> availableDayOfWeekAndTime;
     }
 }
