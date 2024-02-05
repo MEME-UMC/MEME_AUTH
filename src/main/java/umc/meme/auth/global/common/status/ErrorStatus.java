@@ -40,7 +40,9 @@ public enum ErrorStatus implements BaseErrorCode {
 
     NO_PUBLIC_KEY_EXCEPTION(HttpStatus.NOT_FOUND, 401, "일치하는 공개 키가 없습니다."),
     TOKEN_MISMATCH_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "사용자가 일치하지 않습니다"),
-    INVALID_SIGNATURE_EXCEPTION(HttpStatus.BAD_REQUEST,400,"잘못된 JWT 서명입니다.");
+    INVALID_SIGNATURE_EXCEPTION(HttpStatus.BAD_REQUEST,400,"잘못된 JWT 서명입니다."),
+
+    CANNOT_REISSUE_JWT_TOKEN(HttpStatus.BAD_REQUEST, 404, "토큰 재발급을 진행할 수 없습니다.");
 
 
     private final HttpStatus httpStatus;

@@ -11,6 +11,7 @@ import umc.meme.auth.domain.model.entity.ModelRepository;
 import umc.meme.auth.domain.model.entity.enums.PersonalColor;
 import umc.meme.auth.domain.model.entity.enums.SkinType;
 import umc.meme.auth.domain.user.dto.UserRequest;
+import umc.meme.auth.domain.user.dto.UserResponse;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.config.SecurityConfig;
 import umc.meme.auth.global.enums.Provider;
@@ -30,8 +31,8 @@ public class UserService {
     private final ModelRepository modelRepository;
 
     @Transactional
-    public Long modelSignUp(UserRequest.ModelJoinDto joinDto) {
-        return modelRepository.save(Model.builder()
+    public UserResponse.JoinSuccessDto modelSignUp(UserRequest.ModelJoinDto joinDto) {
+        Long userId = modelRepository.save(Model.builder()
                 .email(joinDto.getEmail())
                 .provider(joinDto.getProvider())
                 .profileImg(joinDto.getProfileImg())
@@ -45,11 +46,13 @@ public class UserService {
                 .userStatus(ACTIVE)
                 .inactiveDate(LocalDate.of(2099, 12, 31))
                 .build()).getUserId();
+
+        return new UserResponse.JoinSuccessDto(userId);
     }
 
     @Transactional
-    public Long artistSignUp(UserRequest.ArtistJoinDto joinDto) {
-        return artistRepository.save(Artist.builder()
+    public UserResponse.JoinSuccessDto artistSignUp(UserRequest.ArtistJoinDto joinDto) {
+        Long userId = artistRepository.save(Artist.builder()
                 .email(joinDto.getEmail())
                 .provider(joinDto.getProvider())
                 .profileImg(joinDto.getProfileImg())
@@ -60,6 +63,8 @@ public class UserService {
                 .userStatus(ACTIVE)
                 .inactiveDate(LocalDate.of(2099, 12, 31))
                 .build()).getUserId();
+
+        return new UserResponse.JoinSuccessDto(userId);
     }
 
     @Transactional
