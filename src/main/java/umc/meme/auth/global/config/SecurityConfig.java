@@ -53,6 +53,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v0/auth/withdraw").permitAll()
                                 .requestMatchers("/api/v0/auth/reissue").permitAll()
                                 .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/favicon.ico").permitAll()
                 );
 
         http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
