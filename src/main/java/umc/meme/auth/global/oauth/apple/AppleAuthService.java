@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.meme.auth.domain.user.domain.UserRepository;
+import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.JwtHandler;
 import umc.meme.auth.global.oauth.jwk.JWK;

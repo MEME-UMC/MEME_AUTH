@@ -1,7 +1,6 @@
 package umc.meme.auth.global.oauth.kakao;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -12,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.meme.auth.domain.user.domain.User;
-import umc.meme.auth.domain.user.domain.UserRepository;
+import umc.meme.auth.domain.user.entity.User;
+import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.JwtHandler;
 import umc.meme.auth.global.oauth.jwk.JWK;

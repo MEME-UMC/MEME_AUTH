@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import umc.meme.auth.domain.model.entity.enums.PersonalColor;
 import umc.meme.auth.domain.model.entity.enums.SkinType;
-import umc.meme.auth.domain.user.domain.User;
+import umc.meme.auth.domain.user.entity.User;
 
 @SuperBuilder @Getter
 @NoArgsConstructor

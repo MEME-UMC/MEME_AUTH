@@ -10,7 +10,7 @@ import umc.meme.auth.domain.artist.entity.enums.Category;
 import umc.meme.auth.domain.artist.entity.enums.MakeupLocation;
 import umc.meme.auth.domain.artist.entity.enums.Region;
 import umc.meme.auth.domain.artist.entity.enums.WorkExperience;
-import umc.meme.auth.domain.user.domain.User;
+import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.dto.UserRequest;
 import umc.meme.auth.global.enums.DayOfWeek;
 import umc.meme.auth.global.enums.Times;

@@ -1,4 +1,4 @@
-package umc.meme.auth.domain.user.domain;
+package umc.meme.auth.domain.user.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.ColumnDefault;
 import umc.meme.auth.domain.artist.entity.enums.Gender;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.UserStatus;

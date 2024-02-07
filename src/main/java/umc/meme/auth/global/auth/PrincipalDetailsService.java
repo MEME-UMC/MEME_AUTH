@@ -5,10 +5,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import umc.meme.auth.domain.artist.entity.ArtistRepository;
-import umc.meme.auth.domain.model.entity.ModelRepository;
-import umc.meme.auth.domain.user.domain.User;
-import umc.meme.auth.domain.user.domain.UserRepository;
+import umc.meme.auth.domain.user.entity.User;
+import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.MemberHandler;
 

@@ -1,4 +1,4 @@
-package umc.meme.auth.domain.token.domain;
+package umc.meme.auth.domain.token.entity;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;

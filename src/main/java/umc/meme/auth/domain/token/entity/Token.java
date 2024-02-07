@@ -1,4 +1,4 @@
-package umc.meme.auth.domain.token.domain;
+package umc.meme.auth.domain.token.entity;
 
 import jakarta.persistence.Id;
 import lombok.Builder;
