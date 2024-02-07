@@ -45,8 +45,8 @@ jobs:
           username: ubuntu
           key: ${{ secrets.KEY }}
           script: |
-              sudo chmod 666 /var/run/docker.sock            
-              if [ "$(sudo docker ps -aq)" ]; then
+            
+            if [ "$(sudo docker ps -aq)" ]; then
               sudo docker stop $(sudo docker ps -aq)
               sudo docker rm -f $(sudo docker ps -aq)
             fi
