@@ -54,7 +54,10 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v0/auth/reissue").permitAll()
                                 .requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/favicon.ico").permitAll()
-                );
+                                .requestMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources",
+                                        "/configuration/security", "/swagger-ui.html",
+                                        "/webjars/**", "/swagger-resources/configuration/ui",
+                                        "/swagger-resources/configuration/security", "/swagger-ui.html").permitAll());
 
         http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
