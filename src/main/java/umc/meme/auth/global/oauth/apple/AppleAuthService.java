@@ -9,9 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.JwtHandler;
+import umc.meme.auth.global.oauth.AuthService;
 import umc.meme.auth.global.oauth.jwk.JWK;
 import umc.meme.auth.global.oauth.jwk.JWKRepository;
 
@@ -27,7 +29,7 @@ import static umc.meme.auth.global.common.status.ErrorStatus.NO_PUBLIC_KEY_EXCEP
 
 @RequiredArgsConstructor
 @Service
-public class AppleAuthService {
+public class AppleAuthService implements AuthService {
 
     private final UserRepository userRepository;
     private final JWKRepository keyRepository;
@@ -39,8 +41,9 @@ public class AppleAuthService {
     private String restApiKey;
 
     @Transactional
-    public void getUserInfo(String idToken) {
-        validateIdToken(idToken);
+    @Override
+    public User getUserInfo(String idToken) {
+        return null;
     }
 
     private String validateIdToken(String idToken) {

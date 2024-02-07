@@ -1,6 +1,8 @@
 package umc.meme.auth.global.oauth.kakao;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -15,22 +17,31 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.JwtHandler;
+import umc.meme.auth.global.oauth.AuthService;
 import umc.meme.auth.global.oauth.jwk.JWK;
 import umc.meme.auth.global.oauth.jwk.JWKRepository;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import static umc.meme.auth.global.common.status.ErrorStatus.NO_PUBLIC_KEY_EXCEPTION;
 
 @RequiredArgsConstructor
 @Service
-public class KakaoAuthService {
+public class KakaoAuthService implements AuthService {
 
     private final UserRepository userRepository;
     private final JWKRepository keyRepository;
@@ -42,6 +53,7 @@ public class KakaoAuthService {
     private String restApiKey;
 
     @Transactional
+    @Override
     public User getUserInfo(String idToken) {
         String userEmail = validateIdToken(idToken);
 
@@ -53,6 +65,7 @@ public class KakaoAuthService {
     }
 
     private String validateIdToken(String idToken) {
+        // setPublicKeys();
         // ID 토큰의 영역 구분자인 온점(.)을 기준으로 헤더, 페이로드, 서명을 분리
         String header = getHeader(idToken);
         // 헤더를 Base64 방식으로 디코딩
@@ -98,6 +111,42 @@ public class KakaoAuthService {
         if (splitToken.length != 3)
             throw new JwtHandler(ErrorStatus.JWT_TOKEN_INVALID);
         return splitToken;
+    }
+
+    private void setPublicKeys() {
+        try {
+            String requestURL = "https://kauth.kakao.com/.well-known/jwks.json";
+            URL url = new URL(requestURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("GET");
+
+            int responseCode = conn.getResponseCode();
+            System.out.println("responseCode = " + responseCode);
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+            String line = "";
+            String json = "";
+            List<String> keys = new ArrayList<>();
+
+            while ((line = br.readLine()) != null) {
+                json += line;
+            }
+
+            JsonElement jsonElement = JsonParser.parseString(json);
+            JsonElement jsonkeys = jsonElement.getAsJsonObject().get("keys");
+            JsonArray jsonArray = jsonkeys.getAsJsonArray();
+
+            for(JsonElement element : jsonArray) {
+                System.out.println("element = " + element.getAsJsonObject().get("kid"));
+            }
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private Key getRSAPublicKey(String kty, String modulus, String exponent) throws NoSuchAlgorithmException, InvalidKeySpecException {
