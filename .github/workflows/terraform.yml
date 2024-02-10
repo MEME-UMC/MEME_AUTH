@@ -41,9 +41,9 @@ jobs:
       - name: EC2 docker remove
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.HOST2 }}
           username: ubuntu
-          key: ${{ secrets.KEY }}
+          key: ${{ secrets.KEY2 }}
           script: |
             
             if [ "$(sudo docker ps -aq)" ]; then
@@ -57,9 +57,9 @@ jobs:
       - name: Docker Run on EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.HOST2 }}
           username: ubuntu
-          key: ${{ secrets.KEY }}
+          key: ${{ secrets.KEY2 }}
           script: |
             # Docker 이미지 다운로드
             sudo docker pull ${{ secrets.DOCKER_REPO }}/meme-auth
