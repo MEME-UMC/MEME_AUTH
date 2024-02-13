@@ -38,7 +38,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class KakaoAuthService implements AuthService {
+public class KakaoAuthService {
 
     private static final String REQUEST_URL = "https://kauth.kakao.com/.well-known/jwks.json";
     private static final String PROVIDER = "KAKAO";
@@ -53,7 +53,6 @@ public class KakaoAuthService implements AuthService {
     private final RedisRepository redisRepository;
 
     @Transactional
-    @Override
     public User getUserInfo(String idToken) throws AuthException {
         String userEmail = getUserEmail(idToken);
 
@@ -61,7 +60,7 @@ public class KakaoAuthService implements AuthService {
                 .orElseThrow(() -> new EntityNotFoundException("Email not found: " + userEmail));
     }
 
-    protected String getUserEmail(String idToken) {
+    private String getUserEmail(String idToken) {
         String userEmail = null;
         try {
             // Provider에 맞는 Json Web Key 리스트 가져오기
