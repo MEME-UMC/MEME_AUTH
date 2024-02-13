@@ -53,12 +53,11 @@ public class UserRequest {
     @AllArgsConstructor
     public static class ArtistExtraDto {
         private Long userId;
-
         private String profileImg;
         private String nickname;
+        private Gender gender;
         private String introduction;
         private WorkExperience workExperience;
-
         private List<Region> region;
         private List<Category> specialization;
         private MakeupLocation makeupLocation;

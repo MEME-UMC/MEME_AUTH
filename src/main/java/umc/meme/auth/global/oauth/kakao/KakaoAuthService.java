@@ -2,7 +2,6 @@ package umc.meme.auth.global.oauth.kakao;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -16,17 +15,18 @@ import org.springframework.transaction.annotation.Transactional;
 import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
+import umc.meme.auth.global.exception.handler.AuthHandler;
 import umc.meme.auth.global.exception.handler.JwtHandler;
+import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.oauth.AuthService;
-import umc.meme.auth.global.oauth.jwk.JWK;
-import umc.meme.auth.global.oauth.jwk.JWKRepository;
+import umc.meme.auth.global.oauth.jwk.JsonWebKey;
+import umc.meme.auth.global.oauth.jwk.PublicKeyDto;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -36,15 +36,16 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
-import static umc.meme.auth.global.common.status.ErrorStatus.NO_PUBLIC_KEY_EXCEPTION;
+import static umc.meme.auth.global.common.status.ErrorStatus.KEY_NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
 public class KakaoAuthService implements AuthService {
 
-    private final UserRepository userRepository;
-    private final JWKRepository keyRepository;
+    private static final String REQUEST_URL = "https://kauth.kakao.com/.well-known/jwks.json";
+    private static final String PROVIDER = "KAKAO";
 
     @Value("${spring.security.oauth2.kakao.issuer}")
     private String issuer;
@@ -52,37 +53,45 @@ public class KakaoAuthService implements AuthService {
     @Value("${spring.security.oauth2.kakao.rest-api-key}")
     private String restApiKey;
 
+    private final UserRepository userRepository;
+    private final RedisRepository redisRepository;
+
     @Transactional
     @Override
     public User getUserInfo(String idToken) {
-        String userEmail = validateIdToken(idToken);
+        try {
+            String userEmail = getUserEmail(idToken);
 
-        if (userEmail == null)
-            throw new ValidationException("Validation Exception");
+            if (userEmail == null)
+                throw new ValidationException("Validation Exception");
 
-        return userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new EntityNotFoundException("Email not found: " + userEmail));
+            return userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new EntityNotFoundException("Email not found: " + userEmail));
+        } catch (Exception e) {
+            System.out.println("KakaoAuthService.getUserInfo");
+            throw new AuthHandler(ErrorStatus._UNAUTHORIZED);
+        }
     }
 
-    private String validateIdToken(String idToken) {
-        // setPublicKeys();
-        // ID 토큰의 영역 구분자인 온점(.)을 기준으로 헤더, 페이로드, 서명을 분리
-        String header = getHeader(idToken);
-        // 헤더를 Base64 방식으로 디코딩
-        String decodedHeader = new String(Decoders.BASE64.decode(header));
-
-        JsonParser parser = new JsonParser();
-        // JsonElement element = parser.parse(decodedHeader.toString());
-        JsonElement element = JsonParser.parseString(decodedHeader.toString());
-
-        String kid = element.getAsJsonObject().get("kid").getAsString();
-        JWK publicKey = keyRepository.findByKid(kid)
-                .orElseThrow(() -> new JwtHandler(NO_PUBLIC_KEY_EXCEPTION));
-
+    private String getUserEmail(String idToken) throws Exception {
         String userEmail = null;
         try {
+            // Provider에 맞는 Json Web Key 리스트 가져오기
+            List<JsonWebKey> jsonWebKeys = getJsonWebKeys();
+            // id token 헤더에서 kid 값 가져오기
+            String kid = getKidFromToken(idToken);
+
+            // 일치하는 kid 값 가져오기
+            JsonWebKey selectedKey = null;
+            for (JsonWebKey jsonWebKey : jsonWebKeys) {
+                System.out.println("jsonWebKey.getKid() = " + jsonWebKey.getKid());
+                if (kid.equals(jsonWebKey.getKid()))
+                    selectedKey = jsonWebKey;
+            }
+
+            // 서명 검증
             Jws<Claims> parseClaimsJws = Jwts.parserBuilder()
-                    .setSigningKey(getRSAPublicKey(publicKey.getKty(), publicKey.getN(), publicKey.getE()))
+                    .setSigningKey(getRSAPublicKey(selectedKey.getKty(), selectedKey.getN(), selectedKey.getE()))
                     .requireIssuer(issuer)
                     .requireAudience(restApiKey)
                     .build()
@@ -98,55 +107,106 @@ public class KakaoAuthService implements AuthService {
             e.printStackTrace();
         }
 
+        Jws<Claims> parseClaimsJws = Jwts.parserBuilder()
+                .setSigningKey(getRSAPublicKey(selectedKey.getKty(), selectedKey.getN(), selectedKey.getE()))
+                .requireIssuer(issuer)
+                .requireAudience(restApiKey)
+                .build()
+                .parseClaimsJws(idToken);
+
         return userEmail;
     }
 
-    private String getHeader(String idToken) {
-        String[] splitToken = splitToken(idToken);
-        return splitToken[0];
-    }
+    private List<JsonWebKey> getJsonWebKeys() {
+        // Redis 안에 캐시 값으로 카카오 OIDC 공개 키 목록이 저장되어 있는지 확인
+        Optional<PublicKeyDto> kakaoPublicKeyDto = redisRepository.findPublicKey(PROVIDER);
 
-    private String[] splitToken(String idToken) {
-        String[] splitToken = idToken.split("\\.");
-        if (splitToken.length != 3)
-            throw new JwtHandler(ErrorStatus.JWT_TOKEN_INVALID);
-        return splitToken;
+        // 공개 키 목록이 저장되어 있지 않다면 GET 요청 보내서 공개 키 세팅 (공개 키 캐시 여부 확인)
+        if (kakaoPublicKeyDto.get().getKey() == null)
+            setPublicKeys();
+
+        // 공개 키 목록이 저장되어 있다면 키 목록 가져오고 파싱 진행
+        String keyString = redisRepository.findPublicKey(PROVIDER).get().getKey();
+        return parseKeys(keyString);
     }
 
     private void setPublicKeys() {
         try {
-            String requestURL = "https://kauth.kakao.com/.well-known/jwks.json";
-            URL url = new URL(requestURL);
+            // 공개키 목록 조회 URL 요청
+            URL url = new URL(REQUEST_URL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
             conn.setRequestMethod("GET");
 
             int responseCode = conn.getResponseCode();
-            System.out.println("responseCode = " + responseCode);
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
-            String line = "";
-            String json = "";
-            List<String> keys = new ArrayList<>();
-
-            while ((line = br.readLine()) != null) {
-                json += line;
+            if (responseCode >= 200 && responseCode <= 300) {
+                String jsonData = getJsonData(conn);
+                System.out.println("jsonData = " + jsonData);
+                redisRepository.save(PublicKeyDto.builder()
+                        .provider("KAKAO")
+                        .key(jsonData)
+                        .build());
+            } else {
+                throw new IOException();
             }
-
-            JsonElement jsonElement = JsonParser.parseString(json);
-            JsonElement jsonkeys = jsonElement.getAsJsonObject().get("keys");
-            JsonArray jsonArray = jsonkeys.getAsJsonArray();
-
-            for(JsonElement element : jsonArray) {
-                System.out.println("element = " + element.getAsJsonObject().get("kid"));
-            }
-
-
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new AuthHandler(ErrorStatus.NOT_FOUND);
         }
+    }
 
+    private List<JsonWebKey> parseKeys(String keyString) {
+        // JsonParser 사용해서 공개 키 목록 배열 추출
+        JsonElement jsonElement = JsonParser.parseString(keyString);
+        JsonArray jsonArray = jsonElement.getAsJsonObject().get("keys").getAsJsonArray();
+
+        // 파싱 진행하면 해당 키 객체 리스트로 넣기
+        List<JsonWebKey> keys = new ArrayList<>();
+        for (JsonElement element : jsonArray) {
+            keys.add(JsonWebKey.builder()
+                    .kid(element.getAsJsonObject().get("kid").toString().replace("\"", ""))
+                    .kty(element.getAsJsonObject().get("kty").toString().replace("\"", ""))
+                    .alg(element.getAsJsonObject().get("alg").toString().replace("\"", ""))
+                    .use(element.getAsJsonObject().get("use").toString().replace("\"", ""))
+                    .n(element.getAsJsonObject().get("n").toString().replace("\"", ""))
+                    .e(element.getAsJsonObject().get("e").toString().replace("\"", ""))
+                    .build());
+        }
+        return keys;
+    }
+
+    private String getKidFromToken(String idToken) {
+        // ID 토큰의 영역 구분자인 온점(.)을 기준으로 헤더, 페이로드, 서명을 분리
+        String header = getHeader(idToken);
+        // 헤더를 Base64 방식으로 디코딩
+        String decodedHeader = new String(Decoders.BASE64.decode(header));
+        // JsonParser 사용하여 헤더에 있는 kid 값 불러오기
+        JsonElement element = JsonParser.parseString(decodedHeader.toString());
+        return element.getAsJsonObject().get("kid").getAsString();
+    }
+
+    private String getHeader(String idToken) {
+        String[] dividedToken = splitToken(idToken);
+        return dividedToken[0];
+    }
+
+    private String[] splitToken(String idToken) {
+        String[] dividedToken = idToken.split("\\.");
+        if (dividedToken.length != 3)
+            throw new JwtHandler(ErrorStatus.JWT_TOKEN_INVALID);
+        return dividedToken;
+    }
+
+    private String getJsonData(HttpURLConnection conn) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+        String line = "";
+        String jsonData = "";
+        List<String> keys = new ArrayList<>();
+
+        while ((line = br.readLine()) != null)
+            jsonData += line;
+        System.out.println("jsonData = " + jsonData);
+        return jsonData;
     }
 
     private Key getRSAPublicKey(String kty, String modulus, String exponent) throws NoSuchAlgorithmException, InvalidKeySpecException {

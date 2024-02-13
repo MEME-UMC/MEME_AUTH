@@ -64,14 +64,21 @@ public class Artist extends User {
             this.profileImg = joinDto.getProfileImg();
         if (joinDto.getNickname() != null)
             this.nickname = joinDto.getNickname();
-
-        // 여기서 유효성 검증을 어떻게 하지
-        this.introduction = joinDto.getIntroduction();
-        this.workExperience = joinDto.getWorkExperience();
-        this.region = joinDto.getRegion();
-        this.specialization = joinDto.getSpecialization();
-        this.makeupLocation = joinDto.getMakeupLocation();
-        this.shopLocation = joinDto.getShopLocation();
-        this.availableDayOfWeekAndTime = joinDto.getAvailableDayOfWeekAndTime();
+        if (joinDto.getGender() != null)
+            this.gender = joinDto.getGender();
+        if (joinDto.getIntroduction() != null)
+            this.introduction = joinDto.getIntroduction();
+        if (joinDto.getWorkExperience() != null)
+            this.workExperience = joinDto.getWorkExperience();
+        if (joinDto.getRegion() != null)
+            this.region = joinDto.getRegion();
+        if (joinDto.getSpecialization() != null)
+            this.specialization = joinDto.getSpecialization();
+        if (joinDto.getMakeupLocation() != null)
+            this.makeupLocation = joinDto.getMakeupLocation();
+        if (joinDto.getShopLocation() != null)
+            this.shopLocation = joinDto.getShopLocation();
+        if (joinDto.getAvailableDayOfWeekAndTime() != null)
+            this.availableDayOfWeekAndTime = joinDto.getAvailableDayOfWeekAndTime();
     }
 }
