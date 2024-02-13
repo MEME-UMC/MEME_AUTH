@@ -12,7 +12,6 @@ import umc.meme.auth.domain.user.entity.User;
 @SuperBuilder @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@DiscriminatorValue(value = "Model")
 @Entity
 public class Model extends User {
 

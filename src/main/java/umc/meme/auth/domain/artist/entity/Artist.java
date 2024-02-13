@@ -22,7 +22,6 @@ import java.util.Map;
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@DiscriminatorValue(value = "Artist")
 @Entity
 public class Artist extends User {
 
