@@ -10,6 +10,7 @@ import umc.meme.auth.global.auth.dto.AuthResponse;
 import umc.meme.auth.global.common.BaseResponseDto;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.common.status.SuccessStatus;
+import umc.meme.auth.global.exception.handler.AuthException;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/api/v0/auth/login")
-    public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) {
+    public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) throws AuthException {
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGIN_SUCCESS, authService.login(loginDto));
     }
 
