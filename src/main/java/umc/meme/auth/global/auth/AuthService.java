@@ -1,6 +1,5 @@
 package umc.meme.auth.global.auth;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -17,9 +16,11 @@ import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.AuthHandler;
+import umc.meme.auth.global.exception.handler.AuthException;
 import umc.meme.auth.global.exception.handler.JwtHandler;
+import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
+import umc.meme.auth.global.oauth.OAuthService;
 import umc.meme.auth.global.oauth.apple.AppleAuthService;
 import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
 
@@ -35,18 +36,17 @@ public class AuthService {
     private final PrincipalDetailsService principalDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenRepository tokenRepository;
-    private final KakaoAuthService kakaoAuthService;
-    private final AppleAuthService appleAuthService;
     private final UserRepository userRepository;
+    private final RedisRepository redisRepository;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
     @Transactional
-    public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
+    public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) throws AuthException {
         String userName;
         Authentication authentication;
         try {
-            User userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
+            User userInfo = getUser(loginDto);
             userName = userInfo.getUsername();
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,14 +56,27 @@ public class AuthService {
             throw new LockedException("LOCKED_EXCEPTION", exception);
         } catch (BadCredentialsException exception) {
             throw new BadCredentialsException("BAD_CREDENTIALS_EXCEPTION", exception);
-        } catch (Exception e) {
-            System.out.println("AuthService.login");
-            throw new AuthHandler(ErrorStatus.NOT_FOUND);
+        } catch (AuthException e) {
+            throw new AuthException(e.getBaseErrorCode());
         }
 
         UserDetails userDetails = principalDetailsService.loadUserByUsername(userName);
         AuthResponse.TokenDto tokenDto = generateToken(userDetails.getUsername(), getAuthorities(authentication));
         return tokenDto;
+    }
+
+    private User getUser(AuthRequest.LoginDto loginDto) throws AuthException {
+        OAuthService oAuthService = null;
+
+        if (loginDto.getProvider() == "KAKAO") {
+            oAuthService = new KakaoAuthService(userRepository, redisRepository);
+        } else if (loginDto.getProvider() == "APPLE") {
+            oAuthService = new AppleAuthService(userRepository, redisRepository);
+        } else {
+            throw new AuthException(ErrorStatus.PROVIDER_ERROR);
+        }
+
+        return oAuthService.getUserInfo(loginDto.getId_token());
     }
 
     @Transactional

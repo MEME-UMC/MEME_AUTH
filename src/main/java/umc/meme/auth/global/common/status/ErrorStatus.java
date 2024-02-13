@@ -1,7 +1,10 @@
 package umc.meme.auth.global.common.status;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.apache.coyote.http2.HpackDecoder;
 import org.springframework.http.HttpStatus;
 import umc.meme.auth.global.common.BaseErrorCode;
 import umc.meme.auth.global.common.ErrorReasonDto;
@@ -44,8 +47,18 @@ public enum ErrorStatus implements BaseErrorCode {
 
     CANNOT_REISSUE_JWT_TOKEN(HttpStatus.BAD_REQUEST, 404, "토큰 재발급을 진행할 수 없습니다."),
 
-    // 소셜 로그인 관련 에러
+    // 에러 모음
+    UNSUPPORTED_JWT_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "지원하지 않은 JWT 입니다."),
+    MALFORMED_JWT_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "올바르지 않은 JWT 입니다."),
+    SIGNATURE_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "JWT 토큰 서명 오류입니다."),
+    EXPIRED_JWT_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "만료된 JWT 토큰 입니다."),
+    ILLEGAL_ARGUMENT_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "올바르지 않은 JWT 입니다."),
+    GENERAL_SECURITY_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "공개 키 서명 오류입니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, 404, "요청한 주소로 응답을 받을 수 없습니다."),
+
+    PROVIDER_ERROR(HttpStatus.UNAUTHORIZED, 401, "지정한 소셜 로그인 방식을 찾을 수 없습니다."),
+
+    // 소셜 로그인 관련 에러
     KEY_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "일치하는 Web Key를 찾을 수 없습니다.");
 
 
