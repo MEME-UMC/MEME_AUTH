@@ -15,9 +15,12 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
+import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.AuthException;
 import umc.meme.auth.global.exception.handler.JwtHandler;
+import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
+import umc.meme.auth.global.oauth.OAuthService;
 import umc.meme.auth.global.oauth.apple.AppleAuthService;
 import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
 
@@ -33,9 +36,8 @@ public class AuthService {
     private final PrincipalDetailsService principalDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final TokenRepository tokenRepository;
-    private final KakaoAuthService kakaoAuthService;
-    private final AppleAuthService appleAuthService;
     private final UserRepository userRepository;
+    private final RedisRepository redisRepository;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
@@ -44,8 +46,7 @@ public class AuthService {
         String userName;
         Authentication authentication;
         try {
-            User userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
-            System.out.println("userInfo.getUsername() = " + userInfo.getUsername());
+            User userInfo = getUser(loginDto);
             userName = userInfo.getUsername();
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -62,6 +63,20 @@ public class AuthService {
         UserDetails userDetails = principalDetailsService.loadUserByUsername(userName);
         AuthResponse.TokenDto tokenDto = generateToken(userDetails.getUsername(), getAuthorities(authentication));
         return tokenDto;
+    }
+
+    private User getUser(AuthRequest.LoginDto loginDto) throws AuthException {
+        OAuthService oAuthService = null;
+
+        if (loginDto.getProvider() == "KAKAO") {
+            oAuthService = new KakaoAuthService(userRepository, redisRepository);
+        } else if (loginDto.getProvider() == "APPLE") {
+            oAuthService = new AppleAuthService(userRepository, redisRepository);
+        } else {
+            throw new AuthException(ErrorStatus.PROVIDER_ERROR);
+        }
+
+        return oAuthService.getUserInfo(loginDto.getId_token());
     }
 
     @Transactional
