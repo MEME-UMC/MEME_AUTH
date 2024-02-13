@@ -1,6 +1,5 @@
 package umc.meme.auth.global.auth;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -16,8 +15,7 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
-import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.AuthHandler;
+import umc.meme.auth.global.exception.handler.AuthException;
 import umc.meme.auth.global.exception.handler.JwtHandler;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
 import umc.meme.auth.global.oauth.apple.AppleAuthService;
@@ -42,11 +40,12 @@ public class AuthService {
     private final static String TOKEN_PREFIX = "Bearer ";
 
     @Transactional
-    public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) {
+    public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) throws AuthException {
         String userName;
         Authentication authentication;
         try {
             User userInfo = kakaoAuthService.getUserInfo(loginDto.getId_token());
+            System.out.println("userInfo.getUsername() = " + userInfo.getUsername());
             userName = userInfo.getUsername();
             authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,9 +55,8 @@ public class AuthService {
             throw new LockedException("LOCKED_EXCEPTION", exception);
         } catch (BadCredentialsException exception) {
             throw new BadCredentialsException("BAD_CREDENTIALS_EXCEPTION", exception);
-        } catch (Exception e) {
-            System.out.println("AuthService.login");
-            throw new AuthHandler(ErrorStatus.NOT_FOUND);
+        } catch (AuthException e) {
+            throw new AuthException(e.getBaseErrorCode());
         }
 
         UserDetails userDetails = principalDetailsService.loadUserByUsername(userName);

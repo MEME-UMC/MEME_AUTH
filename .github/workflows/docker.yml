@@ -36,7 +36,16 @@ jobs:
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
           docker build -t ${{ secrets.DOCKER_REPO }}/meme-auth .
-          docker push ${{ secrets.DOCKER_REPO }}/meme-auth    
+          docker push ${{ secrets.DOCKER_REPO }}/meme-auth   
+
+      - name: EC2 docker permission
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.KEY }}
+          script: |
+            sudo chmod 666 /var/run/docker.sock
 
       - name: EC2 docker remove
         uses: appleboy/ssh-action@v0.1.6
