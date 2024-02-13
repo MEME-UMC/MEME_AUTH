@@ -66,7 +66,7 @@ public class AuthService {
     }
 
     private User getUser(AuthRequest.LoginDto loginDto) throws AuthException {
-        OAuthService oAuthService = null;
+        OAuthService oAuthService;
 
         if (loginDto.getProvider() == "KAKAO") {
             oAuthService = new KakaoAuthService(userRepository, redisRepository);
