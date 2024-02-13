@@ -47,7 +47,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
-    private Gender gender;
+    protected Gender gender;
 
     @Column(nullable = true)
     private LocalDate inactiveDate;

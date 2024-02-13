@@ -42,7 +42,11 @@ public enum ErrorStatus implements BaseErrorCode {
     TOKEN_MISMATCH_EXCEPTION(HttpStatus.UNAUTHORIZED, 401, "사용자가 일치하지 않습니다"),
     INVALID_SIGNATURE_EXCEPTION(HttpStatus.BAD_REQUEST,400,"잘못된 JWT 서명입니다."),
 
-    CANNOT_REISSUE_JWT_TOKEN(HttpStatus.BAD_REQUEST, 404, "토큰 재발급을 진행할 수 없습니다.");
+    CANNOT_REISSUE_JWT_TOKEN(HttpStatus.BAD_REQUEST, 404, "토큰 재발급을 진행할 수 없습니다."),
+
+    // 소셜 로그인 관련 에러
+    NOT_FOUND(HttpStatus.NOT_FOUND, 404, "요청한 주소로 응답을 받을 수 없습니다."),
+    KEY_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "일치하는 Web Key를 찾을 수 없습니다.");
 
 
     private final HttpStatus httpStatus;

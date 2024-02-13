@@ -8,6 +8,7 @@ import umc.meme.auth.global.common.ErrorReasonDto;
 @Getter
 @AllArgsConstructor
 public class GeneralException extends RuntimeException {
+
     private final BaseErrorCode baseErrorCode;
 
     public ErrorReasonDto getReason(){
@@ -17,5 +18,4 @@ public class GeneralException extends RuntimeException {
     public ErrorReasonDto getReasonHttpStatus(){
         return this.baseErrorCode.getReasonHttpStatus();
     }
-
 }
