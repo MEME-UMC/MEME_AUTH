@@ -50,6 +50,9 @@ public abstract class OAuthService {
                     selectedKey = jsonWebKey;
             }
 
+            if (selectedKey == null)
+                throw new AuthException(ErrorStatus.KEY_NOT_FOUND);
+
             // 서명 검증
             Claims claims = validateSignature(idToken, getRSAPublicKey(selectedKey));
             userEmail = claims.get("email").toString();

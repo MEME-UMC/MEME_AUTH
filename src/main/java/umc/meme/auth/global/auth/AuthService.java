@@ -56,8 +56,8 @@ public class AuthService {
             throw new LockedException("LOCKED_EXCEPTION", exception);
         } catch (BadCredentialsException exception) {
             throw new BadCredentialsException("BAD_CREDENTIALS_EXCEPTION", exception);
-        } catch (AuthException e) {
-            throw new AuthException(e.getBaseErrorCode());
+        } catch (AuthException exception) {
+            throw exception;
         }
 
         UserDetails userDetails = principalDetailsService.loadUserByUsername(userName);
@@ -68,9 +68,9 @@ public class AuthService {
     private User getUser(AuthRequest.LoginDto loginDto) throws AuthException {
         OAuthService oAuthService;
 
-        if (loginDto.getProvider() == "KAKAO") {
+        if (loginDto.getProvider().equals("KAKAO")) {
             oAuthService = new KakaoAuthService(userRepository, redisRepository);
-        } else if (loginDto.getProvider() == "APPLE") {
+        } else if (loginDto.getProvider().equals("APPLE")) {
             oAuthService = new AppleAuthService(userRepository, redisRepository);
         } else {
             throw new AuthException(ErrorStatus.PROVIDER_ERROR);
