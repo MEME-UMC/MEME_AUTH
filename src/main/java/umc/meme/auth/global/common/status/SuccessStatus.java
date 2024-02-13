@@ -7,10 +7,19 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum SuccessStatus {
-    _OK(HttpStatus.OK,"COMMON200","성공입니다");
+
+    // UserController
+    MODEL_JOIN_SUCCESS(HttpStatus.OK, 200, "회원가입이 완료되었습니다"),
+    ARTIST_JOIN_SUCCESS(HttpStatus.OK, 200, "회원가입이 완료되었습니다"),
+    ARTIST_EXTRA_JOIN_SUCCESS(HttpStatus.OK, 200, "추가 회원 정보 기입이 완료되었습니다."),
+
+    // AuthController
+    LOGIN_SUCCESS(HttpStatus.OK,200,"로그인이 완료되었습니다."),
+    REISSUE_SUCCESS(HttpStatus.OK, 200, "토큰 재발급이 완료되었습니다."),
+    LOGOUT_SUCCESS(HttpStatus.OK, 200, "로그아웃이 완료되었습니다."),
+    WITHDRAW_SUCCESS(HttpStatus.OK, 200, "회원 탈퇴가 완료되었습니다.");
 
     private final HttpStatus httpStatus;
-    private final String code;
+    private final int code;
     private final String message;
-
 }

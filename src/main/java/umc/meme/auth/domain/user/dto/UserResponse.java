@@ -1,15 +1,15 @@
-package umc.meme.auth.domain.token.dto;
+package umc.meme.auth.domain.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-public class RefreshRequest {
+public class UserResponse {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class TokenDto {
-        private String refreshToken;
+    public static class JoinSuccessDto {
+        private Long userId;
     }
 }

@@ -1,6 +1,7 @@
-package umc.meme.auth.domain.artist.domain;
+package umc.meme.auth.domain.artist.entity;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ArtistRepository extends JpaRepository<Artist, Long> {
+
 }
