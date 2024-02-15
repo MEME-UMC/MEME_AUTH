@@ -3,7 +3,7 @@ name: main Workflow
 on:
   push:
     branches:
-      - develop
+      - ci/#20
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,7 +19,7 @@ jobs:
       - name: Set .yml for main
         run: |
           mkdir -p src/main/resources
-          echo "${{ secrets.MAIN_DATABASE_YML }}" | base64 --decode > src/main/resources/application.yml
+          echo "${{ secrets.MAIN_DATABASE_YML2 }}" | base64 --decode > src/main/resources/application.yml
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
