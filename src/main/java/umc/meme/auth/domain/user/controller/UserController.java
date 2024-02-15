@@ -10,6 +10,7 @@ import umc.meme.auth.domain.user.dto.UserResponse;
 import umc.meme.auth.domain.user.service.UserService;
 import umc.meme.auth.global.common.BaseResponseDto;
 import umc.meme.auth.global.common.status.SuccessStatus;
+import umc.meme.auth.global.exception.handler.AuthException;
 
 @RequiredArgsConstructor
 @RestController
@@ -31,7 +32,7 @@ public class UserController {
 
     @Operation(summary = "아티스트 추가 회원가입", description = "아티스트가 회원가입하고 추가 정보를 입력할때 사용하는 API입니다.")
     @PostMapping("/api/v1/signup/artist/extra")
-    public BaseResponseDto<?> artistExtra(@RequestBody UserRequest.ArtistExtraDto joinDto) {
+    public BaseResponseDto<?> artistExtra(@RequestBody UserRequest.ArtistExtraDto joinDto) throws AuthException {
         userService.artistExtra(joinDto);
         return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_EXTRA_JOIN_SUCCESS);
     }
