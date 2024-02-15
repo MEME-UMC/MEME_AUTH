@@ -1,38 +1,31 @@
 package umc.meme.auth.global.oauth.apple;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.SignatureException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.JwtHandler;
-import umc.meme.auth.global.oauth.AuthService;
-import umc.meme.auth.global.oauth.jwk.JWK;
-import umc.meme.auth.global.oauth.jwk.JWKRepository;
+import umc.meme.auth.global.exception.handler.AuthException;
+import umc.meme.auth.global.infra.RedisRepository;
+import umc.meme.auth.global.oauth.OAuthService;
+import umc.meme.auth.global.oauth.jwk.PublicKeyDto;
 
-import java.math.BigInteger;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.Key;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
-import static umc.meme.auth.global.common.status.ErrorStatus.NO_PUBLIC_KEY_EXCEPTION;
-
-@RequiredArgsConstructor
 @Service
-public class AppleAuthService implements AuthService {
+public class AppleAuthService extends OAuthService {
 
-    private final UserRepository userRepository;
-    private final JWKRepository keyRepository;
+    private static final String REQUEST_URL = "https://appleid.apple.com/auth/keys";
+    private static final String PROVIDER = "APPLE";
 
     @Value("${spring.security.oauth2.apple.issuer}")
     private String issuer;
@@ -40,68 +33,74 @@ public class AppleAuthService implements AuthService {
     @Value("${spring.security.oauth2.apple.client-id}")
     private String restApiKey;
 
-    @Transactional
-    @Override
-    public User getUserInfo(String idToken) {
-        return null;
+    private final RedisRepository redisRepository;
+
+    public AppleAuthService(UserRepository userRepository, RedisRepository redisRepository) {
+        super(userRepository);
+        this.redisRepository = redisRepository;
     }
 
-    private String validateIdToken(String idToken) {
-        // ID 토큰의 영역 구분자인 온점(.)을 기준으로 헤더, 페이로드, 서명을 분리
-        String header = getHeader(idToken);
-        // 헤더를 Base64 방식으로 디코딩
-        String decodedHeader = new String(Decoders.BASE64.decode(header));
+    @Override
+    protected String getJsonWebKeys() throws IOException {
+        // Redis 안에 캐시 값으로 카카오 OIDC 공개 키 목록이 저장되어 있는지 확인
+        Optional<PublicKeyDto> kakaoPublicKeyDto = redisRepository.findPublicKey(PROVIDER);
 
-        // JsonParser parser = new JsonParser();
-        // JsonElement element = parser.parse(decodedHeader.toString());
-        JsonElement element = JsonParser.parseString(decodedHeader.toString());
+        // 공개 키 목록이 저장되어 있지 않다면 GET 요청 보내서 공개 키 세팅 (공개 키 캐시 여부 확인)
+        if (kakaoPublicKeyDto.get().getKey() == null)
+            setPublicKeys();
 
-        String kid = element.getAsJsonObject().get("kid").getAsString();
-        JWK publicKey = keyRepository.findByKid(kid)
-                .orElseThrow(() -> new JwtHandler(NO_PUBLIC_KEY_EXCEPTION));
+        // 공개 키 목록이 저장되어 있다면 키 목록 가져오고 파싱 진행
+        return redisRepository.findPublicKey(PROVIDER).get().getKey();
+    }
 
-        String userEmail = null;
+    @Override
+    protected Claims validateSignature(String idToken, Key signingKey) throws AuthException {
         try {
-            Jws<Claims> parseClaimsJws = Jwts.parserBuilder()
-                    .setSigningKey(getRSAPublicKey(publicKey.getKty(), publicKey.getN(), publicKey.getE()))
+            return Jwts.parserBuilder()
+                    .setSigningKey(signingKey)
                     .requireIssuer(issuer)
                     .requireAudience(restApiKey)
                     .build()
-                    .parseClaimsJws(idToken);
-            userEmail = parseClaimsJws.getBody().get("email").toString();
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {  // Signing Key 검증
-            throw new JwtHandler(ErrorStatus.NO_PUBLIC_KEY_EXCEPTION);
-        } catch (SignatureException | MalformedJwtException e) {  // Signature 검증
-            throw new JwtHandler(ErrorStatus.INVALID_SIGNATURE_EXCEPTION);
-        } catch (MissingClaimException | IncorrectClaimException e) {  // Payload 검증 (iss, aud)
-            throw new JwtHandler(ErrorStatus.JWT_PAYLOAD_EXCEPTION);
-        } catch (ExpiredJwtException e) {  // Payload 검증 (exp)
-            e.printStackTrace();
+                    .parseClaimsJws(idToken)
+                    .getBody();
+        } catch (UnsupportedJwtException e) {
+            throw new AuthException(ErrorStatus.UNSUPPORTED_JWT_EXCEPTION);
+        } catch (MalformedJwtException e) {
+            throw new AuthException(ErrorStatus.MALFORMED_JWT_EXCEPTION);
+        } catch (SignatureException e) {
+            throw new AuthException(ErrorStatus.SIGNATURE_EXCEPTION);
+        } catch (ExpiredJwtException e) {
+            throw new AuthException(ErrorStatus.EXPIRED_JWT_EXCEPTION);
+        } catch (IllegalArgumentException e) {
+            throw new AuthException(ErrorStatus.ILLEGAL_ARGUMENT_EXCEPTION);
         }
-
-        return userEmail;
     }
 
-    private String getHeader(String idToken) {
-        String[] splitToken = splitToken(idToken);
-        return splitToken[0];
-    }
+    private void setPublicKeys() throws IOException {
+        // 공개키 목록 조회 URL 요청
+        URL url = new URL(REQUEST_URL);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
 
-    private String[] splitToken(String idToken) {
-        String[] splitToken = idToken.split("\\.");
-        if (splitToken.length != 3)
-            throw new JwtHandler(ErrorStatus.JWT_TOKEN_INVALID);
-        return splitToken;
-    }
+        int responseCode = conn.getResponseCode();
+        if (responseCode >= 200 && responseCode <= 300) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
-    private Key getRSAPublicKey(String kty, String modulus, String exponent) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        KeyFactory keyFactory = KeyFactory.getInstance(kty);
-        byte[] decodeM = Base64.getUrlDecoder().decode(modulus);
-        byte[] decodeE = Base64.getUrlDecoder().decode(exponent);
-        BigInteger m = new BigInteger(1, decodeM);
-        BigInteger e = new BigInteger(1, decodeE);
+            String line = "";
+            String jsonData = "";
+            List<String> keys = new ArrayList<>();
 
-        RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(m, e);
-        return keyFactory.generatePublic(rsaPublicKeySpec);
+            while ((line = br.readLine()) != null)
+                jsonData += line;
+
+            redisRepository.save(PublicKeyDto.builder()
+                    .provider(PROVIDER)
+                    .key(jsonData)
+                    .build());
+        } else {
+            System.out.println("RESPONSE_CODE = " + responseCode);
+            throw new IOException();
+        }
     }
 }
+

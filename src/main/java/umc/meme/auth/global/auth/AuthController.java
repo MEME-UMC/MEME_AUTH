@@ -10,6 +10,7 @@ import umc.meme.auth.global.auth.dto.AuthResponse;
 import umc.meme.auth.global.common.BaseResponseDto;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.common.status.SuccessStatus;
+import umc.meme.auth.global.exception.handler.AuthException;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,12 +18,12 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/api/v0/auth/login")
-    public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) {
+    @PostMapping("/api/v1/login")
+    public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) throws AuthException {
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGIN_SUCCESS, authService.login(loginDto));
     }
 
-    @PostMapping("/api/v0/auth/reissue")
+    @PostMapping("/api/v1/reissue")
     public BaseResponseDto<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) {
         AuthResponse.TokenDto reissueResult = authService.reissue(reissueDto);
 
@@ -32,13 +33,13 @@ public class AuthController {
         return BaseResponseDto.SuccessResponse(SuccessStatus.REISSUE_SUCCESS, reissueResult);
     }
 
-    @PostMapping("/api/v0/auth/logout")
+    @PostMapping("/api/v1/auth/logout")
     public BaseResponseDto<?> logout(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
         authService.logout(requestAccessTokenDto);
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGOUT_SUCCESS);
     }
 
-    @PostMapping("/api/v0/auth/withdraw")
+    @PostMapping("/api/v1/auth/withdraw")
     public BaseResponseDto<?> withdraw(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
         authService.withdraw(requestAccessTokenDto);
         return BaseResponseDto.SuccessResponse(SuccessStatus.WITHDRAW_SUCCESS);

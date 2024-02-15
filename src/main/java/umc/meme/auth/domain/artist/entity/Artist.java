@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import umc.meme.auth.domain.artist.entity.enums.Category;
-import umc.meme.auth.domain.artist.entity.enums.MakeupLocation;
-import umc.meme.auth.domain.artist.entity.enums.Region;
-import umc.meme.auth.domain.artist.entity.enums.WorkExperience;
+import umc.meme.auth.global.enums.Category;
+import umc.meme.auth.global.enums.MakeupLocation;
+import umc.meme.auth.global.enums.Region;
+import umc.meme.auth.global.enums.WorkExperience;
 import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.dto.UserRequest;
 import umc.meme.auth.global.enums.DayOfWeek;
@@ -22,7 +22,6 @@ import java.util.Map;
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@DiscriminatorValue(value = "Artist")
 @Entity
 public class Artist extends User {
 
@@ -64,14 +63,21 @@ public class Artist extends User {
             this.profileImg = joinDto.getProfileImg();
         if (joinDto.getNickname() != null)
             this.nickname = joinDto.getNickname();
-
-        // 여기서 유효성 검증을 어떻게 하지
-        this.introduction = joinDto.getIntroduction();
-        this.workExperience = joinDto.getWorkExperience();
-        this.region = joinDto.getRegion();
-        this.specialization = joinDto.getSpecialization();
-        this.makeupLocation = joinDto.getMakeupLocation();
-        this.shopLocation = joinDto.getShopLocation();
-        this.availableDayOfWeekAndTime = joinDto.getAvailableDayOfWeekAndTime();
+        if (joinDto.getGender() != null)
+            this.gender = joinDto.getGender();
+        if (joinDto.getIntroduction() != null)
+            this.introduction = joinDto.getIntroduction();
+        if (joinDto.getWorkExperience() != null)
+            this.workExperience = joinDto.getWorkExperience();
+        if (joinDto.getRegion() != null)
+            this.region = joinDto.getRegion();
+        if (joinDto.getSpecialization() != null)
+            this.specialization = joinDto.getSpecialization();
+        if (joinDto.getMakeupLocation() != null)
+            this.makeupLocation = joinDto.getMakeupLocation();
+        if (joinDto.getShopLocation() != null)
+            this.shopLocation = joinDto.getShopLocation();
+        if (joinDto.getAvailableDayOfWeekAndTime() != null)
+            this.availableDayOfWeekAndTime = joinDto.getAvailableDayOfWeekAndTime();
     }
 }

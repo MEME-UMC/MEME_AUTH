@@ -18,19 +18,19 @@ public class UserController {
     private final UserService userService;
 
     @Operation(summary = "모델 회원가입", description = "모델이 회원가입할때 사용하는 API입니다.")
-    @PostMapping("/api/v0/auth/model/signup")
+    @PostMapping("/api/v1/signup/model")
     public BaseResponseDto<UserResponse.JoinSuccessDto> modelSignUp(@RequestBody UserRequest.ModelJoinDto joinDto) {
         return BaseResponseDto.SuccessResponse(SuccessStatus.MODEL_JOIN_SUCCESS, userService.modelSignUp(joinDto));
     }
 
     @Operation(summary = "아티스트 회원가입", description = "아티스트가 회원가입할때 사용하는 API입니다.")
-    @PostMapping("/api/v0/auth/artist/signup")
+    @PostMapping("/api/v1/signup/artist")
     public BaseResponseDto<UserResponse.JoinSuccessDto> artistSignUp(@RequestBody UserRequest.ArtistJoinDto joinDto) {
         return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_JOIN_SUCCESS, userService.artistSignUp(joinDto));
     }
 
     @Operation(summary = "아티스트 추가 회원가입", description = "아티스트가 회원가입하고 추가 정보를 입력할때 사용하는 API입니다.")
-    @PostMapping("/api/v0/auth/artist/extra")
+    @PostMapping("/api/v1/signup/artist/extra")
     public BaseResponseDto<?> artistExtra(@RequestBody UserRequest.ArtistExtraDto joinDto) {
         userService.artistExtra(joinDto);
         return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_EXTRA_JOIN_SUCCESS);
