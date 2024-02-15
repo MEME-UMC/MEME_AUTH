@@ -1,5 +1,6 @@
 package umc.meme.auth.global.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,8 +35,11 @@ public class AuthController {
     }
 
     @PostMapping("/api/v1/auth/logout")
-    public BaseResponseDto<?> logout(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        authService.logout(requestAccessTokenDto);
+    public BaseResponseDto<?> logout(HttpServletRequest request) {
+        System.out.println(request);
+        System.out.println(request.getHeader("Authorization"));
+        String header = request.getHeader("Authorization");
+        authService.logout(header);
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGOUT_SUCCESS);
     }
 

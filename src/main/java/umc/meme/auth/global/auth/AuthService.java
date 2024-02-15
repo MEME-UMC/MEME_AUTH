@@ -104,15 +104,15 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        String requestAccessToken = resolveToken(requestAccessTokenDto.getAccessToken());
+    public void logout(String header) {
+        String requestAccessToken = resolveToken(header);
         deleteRefreshToken(requestAccessToken);
         SecurityContextHolder.clearContext();
     }
 
     @Transactional
     public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        logout(requestAccessTokenDto);
+        // logout(requestAccessTokenDto);
         String requestAccessToken = resolveToken(requestAccessTokenDto.getAccessToken());
         String username = (String) jwtTokenProvider.getClaims(requestAccessToken).get("username");
         User user = userRepository.findByUsername(username)
