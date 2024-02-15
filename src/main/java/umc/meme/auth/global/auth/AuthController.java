@@ -18,12 +18,12 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/api/v1/auth/login")
+    @PostMapping("/api/v1/login")
     public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) throws AuthException {
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGIN_SUCCESS, authService.login(loginDto));
     }
 
-    @PostMapping("/api/v1/auth/reissue")
+    @PostMapping("/api/v1/reissue")
     public BaseResponseDto<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) {
         AuthResponse.TokenDto reissueResult = authService.reissue(reissueDto);
 
