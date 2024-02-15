@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisRepository {
 
     private RedisTemplate redisTemplate;
-    private static final long CACHING_EXPIRES = 60 * 60;  // 60분
+    private static final long CACHING_EXPIRES = 60 * 60 * 24;  // 1일
 
     public RedisRepository(RedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
