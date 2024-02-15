@@ -45,13 +45,13 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/api/v1/auth/signup/model").permitAll()
-                                .requestMatchers("/api/v1/auth/signup/artist").permitAll()
-                                .requestMatchers("/api/v1/auth/signup/artist/extra").permitAll()
-                                .requestMatchers("/api/v1/auth/login").permitAll()
-                                .requestMatchers("/api/v1/auth/reissue").permitAll()
-                                .requestMatchers("/api/v1/logout").permitAll()
-                                .requestMatchers("/api/v1/withdraw").permitAll()
+                                .requestMatchers("/api/v1/signup/model").permitAll()
+                                .requestMatchers("/api/v1/signup/artist").permitAll()
+                                .requestMatchers("/api/v1/signup/artist/extra").permitAll()
+                                .requestMatchers("/api/v1/login").permitAll()
+                                .requestMatchers("/api/v1/reissue").permitAll()
+                                .requestMatchers("/api/v1/auth/logout").permitAll()
+                                .requestMatchers("/api/v1/auth/withdraw").permitAll()
                                 .requestMatchers("/auth/**").permitAll()
                 );
 
