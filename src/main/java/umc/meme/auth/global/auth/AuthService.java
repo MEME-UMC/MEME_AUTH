@@ -6,7 +6,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.meme.auth.domain.token.entity.Token;
@@ -15,9 +14,7 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
-import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.AuthException;
-import umc.meme.auth.global.exception.handler.JwtHandler;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
 import umc.meme.auth.global.oauth.OAuthService;
@@ -26,7 +23,7 @@ import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
 
 import java.util.stream.Collectors;
 
-import static umc.meme.auth.global.common.status.ErrorStatus.TOKEN_MISMATCH_EXCEPTION;
+import static umc.meme.auth.global.common.status.ErrorStatus.*;
 
 @RequiredArgsConstructor
 @Service
@@ -73,28 +70,28 @@ public class AuthService {
         } else if (loginDto.getProvider().equals("APPLE")) {
             oAuthService = new AppleAuthService(userRepository, redisRepository);
         } else {
-            throw new AuthException(ErrorStatus.PROVIDER_ERROR);
+            throw new AuthException(PROVIDER_ERROR);
         }
 
         return oAuthService.getUserInfo(loginDto.getId_token());
     }
 
     @Transactional
-    public AuthResponse.TokenDto reissue(AuthRequest.ReissueDto reissueDto) {
+    public AuthResponse.TokenDto reissue(AuthRequest.ReissueDto reissueDto) throws AuthException {
         String requestAccessToken = reissueDto.getAccessToken();
         String requestRefreshToken = reissueDto.getRefreshToken();
 
         Token requestToken = tokenRepository.findByAccessToken(requestAccessToken)
-                .orElseThrow(() -> new IllegalArgumentException("TOKEN_MISMATCH_EXCEPTION"));
+                .orElseThrow(() -> new AuthException(CANNOT_FOUND_USER));
 
         if (requestToken.getRefreshToken() == null) {
             deleteRefreshToken(requestAccessToken);
-            return new AuthResponse.TokenDto(null, null);
+            throw new AuthException(NO_REFRESH_TOKEN);
         }
 
         if (!requestToken.getRefreshToken().equals(requestRefreshToken)) {
             deleteRefreshToken(requestAccessToken);
-            return new AuthResponse.TokenDto(null, null);
+            throw new AuthException(ANOTHER_USER);
         }
 
         deleteRefreshToken(requestAccessToken);
@@ -104,18 +101,18 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String requestHeader) {
+    public void logout(String requestHeader) throws AuthException {
         String requestAccessToken = resolveToken(requestHeader);
         deleteRefreshToken(requestAccessToken);
         SecurityContextHolder.clearContext();
     }
 
     @Transactional
-    public void withdraw(String requestHeader) {
+    public void withdraw(String requestHeader) throws AuthException {
         String requestAccessToken = resolveToken(requestHeader);
         String username = (String) jwtTokenProvider.getClaims(requestAccessToken).get("username");
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));
+                .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
         userRepository.delete(user);
     }
 
@@ -132,9 +129,9 @@ public class AuthService {
                 .build());
     }
 
-    private void deleteRefreshToken(String accessToken) {
+    private void deleteRefreshToken(String accessToken) throws AuthException {
         Token findToken = tokenRepository.findByAccessToken(accessToken)
-                .orElseThrow(() -> new JwtHandler(TOKEN_MISMATCH_EXCEPTION));
+                .orElseThrow(() -> new AuthException(TOKEN_MISMATCH_EXCEPTION));
         tokenRepository.delete(findToken);
     }
 

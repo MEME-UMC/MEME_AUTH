@@ -25,7 +25,7 @@ public class AuthController {
     }
 
     @PostMapping("/api/v1/reissue")
-    public BaseResponseDto<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) {
+    public BaseResponseDto<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) throws AuthException {
         AuthResponse.TokenDto reissueResult = authService.reissue(reissueDto);
 
         if (reissueResult.getAccessToken() == null)
@@ -35,13 +35,13 @@ public class AuthController {
     }
 
     @PostMapping("/api/v1/auth/logout")
-    public BaseResponseDto<?> logout(HttpServletRequest request) {
+    public BaseResponseDto<?> logout(HttpServletRequest request) throws AuthException {
         authService.logout(request.getHeader("Authorization"));
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGOUT_SUCCESS);
     }
 
     @PostMapping("/api/v1/auth/withdraw")
-    public BaseResponseDto<?> withdraw(HttpServletRequest request) {
+    public BaseResponseDto<?> withdraw(HttpServletRequest request) throws AuthException {
         authService.withdraw(request.getHeader("Authorization"));
         return BaseResponseDto.SuccessResponse(SuccessStatus.WITHDRAW_SUCCESS);
     }

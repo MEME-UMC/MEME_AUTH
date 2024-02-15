@@ -57,7 +57,12 @@ public enum ErrorStatus implements BaseErrorCode {
     NOT_FOUND(HttpStatus.NOT_FOUND, 404, "요청한 주소로 응답을 받을 수 없습니다."),
 
     PROVIDER_ERROR(HttpStatus.UNAUTHORIZED, 401, "지정한 소셜 로그인 방식을 찾을 수 없습니다."),
-    KEY_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "일치하는 Web Key를 찾을 수 없습니다.");
+    KEY_NOT_FOUND(HttpStatus.NOT_FOUND, 404, "일치하는 Web Key를 찾을 수 없습니다."),
+
+    CANNOT_FOUND_USER(HttpStatus.UNAUTHORIZED, 401, "등록된 사용자가 아닙니다."),
+    NO_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "Refresh Token이 없습니다."),
+    ANOTHER_USER(HttpStatus.UNAUTHORIZED, 401, "토큰 탈취 위협이 있습니다."),
+    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "사용자를 찾을 수 없습니다.");
 
 
     private final HttpStatus httpStatus;

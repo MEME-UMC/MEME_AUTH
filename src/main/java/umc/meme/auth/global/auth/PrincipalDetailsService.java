@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.MemberHandler;
 
 @RequiredArgsConstructor
 @Service

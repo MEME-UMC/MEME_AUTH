@@ -10,7 +10,6 @@ import umc.meme.auth.domain.model.entity.ModelRepository;
 import umc.meme.auth.domain.user.dto.UserRequest;
 import umc.meme.auth.domain.user.dto.UserResponse;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.MemberHandler;
 
 import java.time.LocalDate;
 
