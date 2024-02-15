@@ -16,8 +16,8 @@ public enum SuccessStatus {
     // AuthController
     LOGIN_SUCCESS(HttpStatus.OK,200,"로그인이 완료되었습니다."),
     REISSUE_SUCCESS(HttpStatus.OK, 200, "토큰 재발급이 완료되었습니다."),
-    LOGOUT_SUCCESS(HttpStatus.OK, 200, "로그아웃이 완료되었습니다."),
-    WITHDRAW_SUCCESS(HttpStatus.OK, 200, "회원 탈퇴가 완료되었습니다.");
+    LOGOUT_SUCCESS(HttpStatus.OK, 200, "Logout Success"),
+    WITHDRAW_SUCCESS(HttpStatus.OK, 200, "Withdraw Success");
 
     private final HttpStatus httpStatus;
     private final int code;
