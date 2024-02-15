@@ -1,6 +1,7 @@
 package umc.meme.auth.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.meme.auth.domain.artist.entity.Artist;
@@ -10,7 +11,7 @@ import umc.meme.auth.domain.model.entity.ModelRepository;
 import umc.meme.auth.domain.user.dto.UserRequest;
 import umc.meme.auth.domain.user.dto.UserResponse;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.MemberHandler;
+import umc.meme.auth.global.exception.handler.AuthException;
 
 import java.time.LocalDate;
 
@@ -62,9 +63,9 @@ public class UserService {
     }
 
     @Transactional
-    public void artistExtra(UserRequest.ArtistExtraDto joinDto) {
+    public void artistExtra(UserRequest.ArtistExtraDto joinDto) throws AuthException {
         Artist artist = artistRepository.findById(joinDto.getUserId())
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.ARTIST_NOT_FOUND));
+                .orElseThrow(() -> new AuthException(ErrorStatus.NOT_FOUND));
         artist.update(joinDto);
     }
 }

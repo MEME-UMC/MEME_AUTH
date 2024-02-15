@@ -13,7 +13,6 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.handler.AuthException;
-import umc.meme.auth.global.exception.handler.JwtHandler;
 import umc.meme.auth.global.oauth.jwk.JsonWebKey;
 
 import java.io.IOException;
@@ -68,7 +67,7 @@ public abstract class OAuthService {
                 .orElseThrow(() -> new EntityNotFoundException("Email not found"));
     }
 
-    private String getKidFromToken(String idToken) {
+    private String getKidFromToken(String idToken) throws AuthException {
         // ID 토큰의 영역 구분자인 온점(.)을 기준으로 헤더, 페이로드, 서명을 분리
         String header = getHeader(idToken);
         // 헤더를 Base64 방식으로 디코딩
@@ -78,15 +77,15 @@ public abstract class OAuthService {
         return element.getAsJsonObject().get("kid").getAsString();
     }
 
-    private String getHeader(String idToken) {
+    private String getHeader(String idToken) throws AuthException {
         String[] dividedToken = splitToken(idToken);
         return dividedToken[0];
     }
 
-    private String[] splitToken(String idToken) {
+    private String[] splitToken(String idToken) throws AuthException {
         String[] dividedToken = idToken.split("\\.");
         if (dividedToken.length != 3)
-            throw new JwtHandler(ErrorStatus.JWT_TOKEN_INVALID);
+            throw new AuthException(ErrorStatus.JWT_TOKEN_INVALID);
         return dividedToken;
     }
 

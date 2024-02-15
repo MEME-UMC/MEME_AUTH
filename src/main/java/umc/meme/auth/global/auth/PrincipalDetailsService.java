@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.MemberHandler;
 
 @RequiredArgsConstructor
 @Service
@@ -19,7 +18,7 @@ public class PrincipalDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new MemberHandler(ErrorStatus.MEMBER_NOT_FOUND));
+                .orElseThrow(() -> new UsernameNotFoundException("Cannot found user"));
 
         return new PrincipalDetails(user);
     }
