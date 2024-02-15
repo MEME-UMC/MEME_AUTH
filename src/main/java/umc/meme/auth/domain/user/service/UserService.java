@@ -5,17 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.meme.auth.domain.artist.entity.Artist;
 import umc.meme.auth.domain.artist.entity.ArtistRepository;
-import umc.meme.auth.domain.artist.entity.enums.Gender;
 import umc.meme.auth.domain.model.entity.Model;
 import umc.meme.auth.domain.model.entity.ModelRepository;
-import umc.meme.auth.domain.model.entity.enums.PersonalColor;
-import umc.meme.auth.domain.model.entity.enums.SkinType;
 import umc.meme.auth.domain.user.dto.UserRequest;
 import umc.meme.auth.domain.user.dto.UserResponse;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.config.SecurityConfig;
-import umc.meme.auth.global.enums.Provider;
-import umc.meme.auth.global.enums.UserStatus;
 import umc.meme.auth.global.exception.handler.MemberHandler;
 
 import java.time.LocalDate;

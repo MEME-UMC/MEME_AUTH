@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import umc.meme.auth.domain.artist.entity.enums.Gender;
+import umc.meme.auth.global.enums.Gender;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.UserStatus;
 
