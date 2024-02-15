@@ -104,16 +104,15 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String header) {
-        String requestAccessToken = resolveToken(header);
+    public void logout(String requestHeader) {
+        String requestAccessToken = resolveToken(requestHeader);
         deleteRefreshToken(requestAccessToken);
         SecurityContextHolder.clearContext();
     }
 
     @Transactional
-    public void withdraw(AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        // logout(requestAccessTokenDto);
-        String requestAccessToken = resolveToken(requestAccessTokenDto.getAccessToken());
+    public void withdraw(String requestHeader) {
+        String requestAccessToken = resolveToken(requestHeader);
         String username = (String) jwtTokenProvider.getClaims(requestAccessToken).get("username");
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Username Not Found"));

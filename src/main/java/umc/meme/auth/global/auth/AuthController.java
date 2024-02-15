@@ -36,16 +36,13 @@ public class AuthController {
 
     @PostMapping("/api/v1/auth/logout")
     public BaseResponseDto<?> logout(HttpServletRequest request) {
-        System.out.println(request);
-        System.out.println(request.getHeader("Authorization"));
-        String header = request.getHeader("Authorization");
-        authService.logout(header);
+        authService.logout(request.getHeader("Authorization"));
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGOUT_SUCCESS);
     }
 
     @PostMapping("/api/v1/auth/withdraw")
-    public BaseResponseDto<?> withdraw(@RequestHeader("Authorization") AuthRequest.AccessTokenDto requestAccessTokenDto) {
-        authService.withdraw(requestAccessTokenDto);
+    public BaseResponseDto<?> withdraw(HttpServletRequest request) {
+        authService.withdraw(request.getHeader("Authorization"));
         return BaseResponseDto.SuccessResponse(SuccessStatus.WITHDRAW_SUCCESS);
     }
 }
