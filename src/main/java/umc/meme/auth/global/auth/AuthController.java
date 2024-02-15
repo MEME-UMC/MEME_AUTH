@@ -19,12 +19,12 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/api/v1/login")
+    @PostMapping("/api/v1/auth/login")
     public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) throws AuthException {
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGIN_SUCCESS, authService.login(loginDto));
     }
 
-    @PostMapping("/api/v1/reissue")
+    @PostMapping("/api/v1/auth/reissue")
     public BaseResponseDto<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) throws AuthException {
         AuthResponse.TokenDto reissueResult = authService.reissue(reissueDto);
 
@@ -34,13 +34,13 @@ public class AuthController {
         return BaseResponseDto.SuccessResponse(SuccessStatus.REISSUE_SUCCESS, reissueResult);
     }
 
-    @PostMapping("/api/v1/auth/logout")
+    @PostMapping("/api/v1/logout")
     public BaseResponseDto<?> logout(HttpServletRequest request) throws AuthException {
         authService.logout(request.getHeader("Authorization"));
         return BaseResponseDto.SuccessResponse(SuccessStatus.LOGOUT_SUCCESS);
     }
 
-    @PostMapping("/api/v1/auth/withdraw")
+    @PostMapping("/api/v1/withdraw")
     public BaseResponseDto<?> withdraw(HttpServletRequest request) throws AuthException {
         authService.withdraw(request.getHeader("Authorization"));
         return BaseResponseDto.SuccessResponse(SuccessStatus.WITHDRAW_SUCCESS);
