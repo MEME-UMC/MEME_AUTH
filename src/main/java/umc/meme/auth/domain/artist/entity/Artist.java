@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.enums.Category;
 import umc.meme.auth.global.enums.MakeupLocation;
 import umc.meme.auth.global.enums.Region;
@@ -58,7 +59,9 @@ public class Artist extends User {
     @Column(nullable = true)
     private Map<DayOfWeek, Times> availableDayOfWeekAndTime;
 
-    public void update(UserRequest.ArtistExtraDto joinDto) {
+    private boolean details;
+
+    public void update(AuthRequest.ArtistExtraDto joinDto) {
         if (joinDto.getProfileImg() != null)
             this.profileImg = joinDto.getProfileImg();
         if (joinDto.getNickname() != null)

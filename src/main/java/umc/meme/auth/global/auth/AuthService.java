@@ -8,12 +8,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import umc.meme.auth.domain.artist.entity.Artist;
+import umc.meme.auth.domain.artist.entity.ArtistRepository;
+import umc.meme.auth.domain.model.entity.Model;
+import umc.meme.auth.domain.model.entity.ModelRepository;
 import umc.meme.auth.domain.token.entity.Token;
 import umc.meme.auth.domain.token.entity.TokenRepository;
 import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
+import umc.meme.auth.global.common.status.ErrorStatus;
+import umc.meme.auth.global.config.SecurityConfig;
+import umc.meme.auth.global.enums.Provider;
+import umc.meme.auth.global.enums.UserStatus;
 import umc.meme.auth.global.exception.handler.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
@@ -21,9 +29,13 @@ import umc.meme.auth.global.oauth.OAuthService;
 import umc.meme.auth.global.oauth.apple.AppleAuthService;
 import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
 
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import static umc.meme.auth.global.common.status.ErrorStatus.*;
+import static umc.meme.auth.global.config.SecurityConfig.passwordEncoder;
+import static umc.meme.auth.global.enums.Provider.APPLE;
+import static umc.meme.auth.global.enums.Provider.KAKAO;
 
 @RequiredArgsConstructor
 @Service
@@ -35,17 +47,77 @@ public class AuthService {
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
     private final RedisRepository redisRepository;
+    private final ModelRepository modelRepository;
+    private final ArtistRepository artistRepository;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
     @Transactional
-    public AuthResponse.TokenDto login(AuthRequest.LoginDto loginDto) throws AuthException {
-        String userName;
+    public AuthResponse.TokenDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) {
+        String userEmail = getUser(modelJoinDto.getId_token(), modelJoinDto.getProvider());
+
+        User user = Model.builder()
+                .email(userEmail)
+                .provider(modelJoinDto.getProvider())
+                .profileImg(modelJoinDto.getProfileImg())
+                .username(modelJoinDto.getUsername())
+                .nickname(modelJoinDto.getNickname())
+                .gender(modelJoinDto.getGender())
+                .skinType(modelJoinDto.getSkinType())
+                .personalColor(modelJoinDto.getPersonalColor())
+                .password(SecurityConfig.passwordEncoder().encode(userEmail))
+                .role("MODEL")
+                .inactiveDate(LocalDate.of(2099,12,31))
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        Long userId = modelRepository.save((Model) user).getUserId();
+
+        AuthResponse.TokenDto tokenDto = login(user);
+        tokenDto.setUserId(userId);
+        tokenDto.setDetails(true);
+
+        return tokenDto;
+    }
+
+    @Transactional
+    public AuthResponse.TokenDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) {
+        String userEmail = getUser(artistJoinDto.getId_token(), artistJoinDto.getProvider());
+
+        User user = Artist.builder()
+                .email(userEmail)
+                .provider(artistJoinDto.getProvider())
+                .profileImg(artistJoinDto.getProfileImg())
+                .username(artistJoinDto.getUsername())
+                .nickname(artistJoinDto.getNickname())
+                .password(SecurityConfig.passwordEncoder().encode(userEmail))
+                .role("ARTIST")
+                .details(false)
+                .inactiveDate(LocalDate.of(2099,12,31))
+                .userStatus(UserStatus.ACTIVE)
+                .build();
+
+        Long userId = artistRepository.save((Artist) user).getUserId();
+
+        AuthResponse.TokenDto tokenDto = login(user);
+        tokenDto.setUserId(userId);
+        tokenDto.setDetails(user.getDetails());
+
+        return tokenDto;
+    }
+
+    @Transactional
+    public void signupArtistExtra(AuthRequest.ArtistExtraDto artistExtraDto) {
+        Artist artist = artistRepository.findById(artistExtraDto.getUserId())
+                .orElseThrow(() -> new AuthException(ARTIST_NOT_FOUND));
+        artist.update(artistExtraDto);
+    }
+
+    @Transactional
+    public AuthResponse.TokenDto login(User user) throws AuthException {
         Authentication authentication;
         try {
-            User userInfo = getUser(loginDto);
-            userName = userInfo.getUsername();
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userInfo.getUsername(), userInfo.getEmail()));
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getEmail()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (DisabledException exception) {
             throw new DisabledException("DISABLED_EXCEPTION", exception);
@@ -57,23 +129,23 @@ public class AuthService {
             throw exception;
         }
 
-        UserDetails userDetails = principalDetailsService.loadUserByUsername(userName);
+        UserDetails userDetails = principalDetailsService.loadUserByUsername(user.getUsername());
         AuthResponse.TokenDto tokenDto = generateToken(userDetails.getUsername(), getAuthorities(authentication));
         return tokenDto;
     }
 
-    private User getUser(AuthRequest.LoginDto loginDto) throws AuthException {
+    private String getUser(String idToken, Provider provider) throws AuthException {
         OAuthService oAuthService;
 
-        if (loginDto.getProvider().equals("KAKAO")) {
+        if (provider.equals(KAKAO)) {
             oAuthService = new KakaoAuthService(userRepository, redisRepository);
-        } else if (loginDto.getProvider().equals("APPLE")) {
+        } else if (provider.equals(APPLE)) {
             oAuthService = new AppleAuthService(userRepository, redisRepository);
         } else {
             throw new AuthException(PROVIDER_ERROR);
         }
 
-        return oAuthService.getUserInfo(loginDto.getId_token());
+        return oAuthService.getUserInfo(idToken);
     }
 
     @Transactional

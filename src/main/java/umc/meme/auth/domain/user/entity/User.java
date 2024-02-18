@@ -26,26 +26,29 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    @NotNull
+    // @NotNull
     protected String profileImg;
 
-    @NotNull
+    // @NotNull
     @Column(length = 40)
     protected String nickname;
 
-    @NotNull
-    @Column(unique = true, length = 20)
+    // @NotNull
+    @Column(unique = true, length = 100)
     private String username;
 
-    @NotNull
+    // @NotNull
     @Column(length = 40)
     private String email;
 
-    @NotNull
+    // @NotNull
     private String password;
 
-    @NotNull
+    // @NotNull
     private String role;
+
+    @NotNull
+    private boolean details;  // 새롭게 추가, 기본 값은 false
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
@@ -61,10 +64,14 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
-    @NotNull
+    // @NotNull
     private UserStatus userStatus;
 
     @Enumerated(EnumType.STRING)
-    @NotNull
+    // @NotNull
     private Provider provider;
+
+    public boolean getDetails() {
+        return details;
+    }
 }
