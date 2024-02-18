@@ -18,9 +18,11 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
+import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.config.SecurityConfig;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.UserStatus;
+import umc.meme.auth.global.exception.GeneralException;
 import umc.meme.auth.global.exception.handler.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
@@ -53,13 +55,18 @@ public class AuthService {
     @Transactional
     public AuthResponse.TokenDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) {
         String userEmail = getUser(modelJoinDto.getId_token(), modelJoinDto.getProvider());
+        String nickName = modelJoinDto.getNickname();
+
+        if(modelRepository.existsByNickName(nickName)
+                || artistRepository.existsByNickName(nickName))
+            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
 
         User user = Model.builder()
                 .email(userEmail)
                 .provider(modelJoinDto.getProvider())
                 .profileImg(modelJoinDto.getProfileImg())
                 .username(modelJoinDto.getUsername())
-                .nickname(modelJoinDto.getNickname())
+                .nickname(nickName)
                 .gender(modelJoinDto.getGender())
                 .skinType(modelJoinDto.getSkinType())
                 .personalColor(modelJoinDto.getPersonalColor())
@@ -81,13 +88,18 @@ public class AuthService {
     @Transactional
     public AuthResponse.TokenDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) {
         String userEmail = getUser(artistJoinDto.getId_token(), artistJoinDto.getProvider());
+        String nickName = artistJoinDto.getNickname();
+
+        if(modelRepository.existsByNickName(nickName)
+                || artistRepository.existsByNickName(nickName))
+            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
 
         User user = Artist.builder()
                 .email(userEmail)
                 .provider(artistJoinDto.getProvider())
                 .profileImg(artistJoinDto.getProfileImg())
                 .username(artistJoinDto.getUsername())
-                .nickname(artistJoinDto.getNickname())
+                .nickname(nickName)
                 .password(SecurityConfig.passwordEncoder().encode(userEmail))
                 .role("ARTIST")
                 .details(false)
