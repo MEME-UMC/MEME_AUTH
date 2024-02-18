@@ -32,7 +32,7 @@ public abstract class OAuthService {
     private final UserRepository userRepository;
 
     @Transactional
-    public User getUserInfo(String idToken) throws AuthException {
+    public String getUserInfo(String idToken) throws AuthException {
         String userEmail = null;
 
         try {
@@ -63,8 +63,9 @@ public abstract class OAuthService {
             throw authException;
         }
 
-        return userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new EntityNotFoundException("Email not found"));
+        return userEmail;
+
+        // return userRepository.findByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("Email not found"));
     }
 
     private String getKidFromToken(String idToken) throws AuthException {

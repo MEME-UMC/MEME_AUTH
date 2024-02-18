@@ -14,7 +14,7 @@ public enum SuccessStatus {
     ARTIST_EXTRA_JOIN_SUCCESS(HttpStatus.OK, 200, "추가 회원 정보 기입이 완료되었습니다."),
 
     // AuthController
-    LOGIN_SUCCESS(HttpStatus.OK,200,"로그인이 완료되었습니다."),
+    LOGIN_SUCCESS(HttpStatus.OK,200,"토큰 검증에 성공하였습니다."),
     REISSUE_SUCCESS(HttpStatus.OK, 200, "토큰 재발급이 완료되었습니다."),
     LOGOUT_SUCCESS(HttpStatus.OK, 200, "Logout Success"),
     WITHDRAW_SUCCESS(HttpStatus.OK, 200, "Withdraw Success");

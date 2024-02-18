@@ -12,4 +12,12 @@ public class UserResponse {
     public static class JoinSuccessDto {
         private Long userId;
     }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ArtistSuccessDto {
+        private Long userId;
+        private boolean isAdditionalWrite;
+    }
 }
