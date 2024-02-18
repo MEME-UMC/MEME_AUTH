@@ -57,8 +57,7 @@ public class AuthService {
         String userEmail = getUser(modelJoinDto.getId_token(), modelJoinDto.getProvider());
         String nickName = modelJoinDto.getNickname();
 
-        if(modelRepository.existsByNickName(nickName)
-                || artistRepository.existsByNickName(nickName))
+        if(userRepository.existsByNickname(nickName))
             throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
 
         User user = Model.builder()
@@ -90,8 +89,7 @@ public class AuthService {
         String userEmail = getUser(artistJoinDto.getId_token(), artistJoinDto.getProvider());
         String nickName = artistJoinDto.getNickname();
 
-        if(modelRepository.existsByNickName(nickName)
-                || artistRepository.existsByNickName(nickName))
+        if(userRepository.existsByNickname(nickName))
             throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
 
         User user = Artist.builder()
