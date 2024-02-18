@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
@@ -19,9 +18,20 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/api/v1/login")
-    public BaseResponseDto<AuthResponse.TokenDto> login(@RequestBody AuthRequest.LoginDto loginDto) throws AuthException {
-        return BaseResponseDto.SuccessResponse(SuccessStatus.LOGIN_SUCCESS, authService.login(loginDto));
+    @PostMapping("/api/v1/signup/model")
+    public BaseResponseDto<AuthResponse.TokenDto> signupModel(@RequestBody AuthRequest.ModelJoinDto modelJoinDto) throws AuthException{
+        return BaseResponseDto.SuccessResponse(SuccessStatus.MODEL_JOIN_SUCCESS, authService.signupModel(modelJoinDto));
+    }
+
+    @PostMapping("/api/v1/signup/artist")
+    public BaseResponseDto<AuthResponse.TokenDto> signupArtist(@RequestBody AuthRequest.ArtistJoinDto artistJoinDto) throws AuthException {
+        return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_JOIN_SUCCESS, authService.signupArtist(artistJoinDto));
+    }
+
+    @PostMapping("/api/v1/auth/artist/extra")
+    public BaseResponseDto signupArtistExtra(@RequestBody AuthRequest.ArtistExtraDto artistExtraDto) throws AuthException {
+        authService.signupArtistExtra(artistExtraDto);
+        return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_EXTRA_JOIN_SUCCESS);
     }
 
     @PostMapping("/api/v1/reissue")

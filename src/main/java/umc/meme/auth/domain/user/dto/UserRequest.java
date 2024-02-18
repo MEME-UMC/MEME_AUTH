@@ -17,8 +17,9 @@ public class UserRequest {
     @AllArgsConstructor
     public static class ModelJoinDto {
         // OAuth
-        private String email;
-        private Provider provider;
+        // private String email;
+        // private Provider provider;
+        private Long userId;
 
         // User
         private String profileImg;
@@ -36,8 +37,8 @@ public class UserRequest {
     @AllArgsConstructor
     public static class ArtistJoinDto {
         // OAuth
-        private String email;
-        private Provider provider;
+        // private String email;
+        // private Provider provider;
 
         // User
         private String profileImg;

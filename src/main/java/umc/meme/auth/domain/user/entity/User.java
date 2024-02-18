@@ -34,7 +34,7 @@ public class User {
     protected String nickname;
 
     @NotNull
-    @Column(unique = true, length = 20)
+    @Column(unique = true, length = 100)
     private String username;
 
     @NotNull
@@ -46,6 +46,9 @@ public class User {
 
     @NotNull
     private String role;
+
+    @NotNull
+    private boolean details;  // 새롭게 추가, 기본 값은 false
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = true)
@@ -67,4 +70,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     @NotNull
     private Provider provider;
+
+    public boolean getDetails() {
+        return details;
+    }
 }
