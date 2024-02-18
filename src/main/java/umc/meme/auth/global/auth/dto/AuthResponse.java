@@ -14,6 +14,7 @@ public class AuthResponse {
         private String accessToken;
         private String refreshToken;
         private boolean details;
+        private String type;
 
         public TokenDto(String accessToken, String refreshToken) {
             this.accessToken = accessToken;
@@ -26,6 +27,10 @@ public class AuthResponse {
 
         public void setDetails(boolean details) {
             this.details = details;
+        }
+
+        public void setType(String type) {
+            this.type = type;
         }
     }
 
