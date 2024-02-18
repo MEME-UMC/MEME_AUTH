@@ -26,25 +26,25 @@ public class User {
     @Column(name = "user_id")
     private Long userId;
 
-    // @NotNull
+    @NotNull
     protected String profileImg;
 
-    // @NotNull
+    @NotNull
     @Column(length = 40)
     protected String nickname;
 
-    // @NotNull
+    @NotNull
     @Column(unique = true, length = 100)
     private String username;
 
-    // @NotNull
+    @NotNull
     @Column(length = 40)
     private String email;
 
-    // @NotNull
+    @NotNull
     private String password;
 
-    // @NotNull
+    @NotNull
     private String role;
 
     @NotNull
@@ -64,11 +64,11 @@ public class User {
     private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
-    // @NotNull
+    @NotNull
     private UserStatus userStatus;
 
     @Enumerated(EnumType.STRING)
-    // @NotNull
+    @NotNull
     private Provider provider;
 
     public boolean getDetails() {

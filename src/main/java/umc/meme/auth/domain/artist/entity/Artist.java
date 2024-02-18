@@ -59,8 +59,6 @@ public class Artist extends User {
     @Column(nullable = true)
     private Map<DayOfWeek, Times> availableDayOfWeekAndTime;
 
-    private boolean details;
-
     public void update(AuthRequest.ArtistExtraDto joinDto) {
         if (joinDto.getProfileImg() != null)
             this.profileImg = joinDto.getProfileImg();

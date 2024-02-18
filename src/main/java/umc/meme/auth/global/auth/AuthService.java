@@ -18,7 +18,6 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
-import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.config.SecurityConfig;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.UserStatus;
@@ -33,7 +32,6 @@ import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import static umc.meme.auth.global.common.status.ErrorStatus.*;
-import static umc.meme.auth.global.config.SecurityConfig.passwordEncoder;
 import static umc.meme.auth.global.enums.Provider.APPLE;
 import static umc.meme.auth.global.enums.Provider.KAKAO;
 
