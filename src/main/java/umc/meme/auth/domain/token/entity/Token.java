@@ -1,20 +1,18 @@
-package umc.meme.auth.domain.token.domain;
+package umc.meme.auth.domain.token.entity;
 
-import jakarta.persistence.Id;
 import lombok.Builder;
 
 import java.io.Serializable;
 
 @Builder
-public class RefreshToken implements Serializable {
+public class Token implements Serializable {
 
-    @Id
-    private String refreshToken;
     private String accessToken;
+    private String refreshToken;
 
-    public RefreshToken(final String refreshToken, final String accessToken) {
-        this.refreshToken = refreshToken;
+    public Token(String accessToken, String refreshToken) {
         this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
     }
 
     public String getRefreshToken() {

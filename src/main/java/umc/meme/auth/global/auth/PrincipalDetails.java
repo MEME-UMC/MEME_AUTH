@@ -3,7 +3,7 @@ package umc.meme.auth.global.auth;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import umc.meme.auth.domain.user.domain.User;
+import umc.meme.auth.domain.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.Collection;

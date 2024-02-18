@@ -45,10 +45,15 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/api/v0/auth/signup").permitAll()
-                                .requestMatchers("/api/v0/auth/login").permitAll()
-                                .requestMatchers("/api/v0/auth/reissue").permitAll()
+                                .requestMatchers("/api/v1/signup/model").permitAll()
+                                .requestMatchers("/api/v1/signup/artist").permitAll()
+                                .requestMatchers("/api/v1/auth/artist/extra").permitAll()
+                                .requestMatchers("/api/v1/reissue").permitAll()
+                                .requestMatchers("/api/v1/auth/logout").permitAll()
+                                .requestMatchers("/api/v1/auth/withdraw").permitAll()
+                                .requestMatchers("/auth/**").permitAll()
                 );
+
 
         http.addFilterBefore(jwtCustomAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
