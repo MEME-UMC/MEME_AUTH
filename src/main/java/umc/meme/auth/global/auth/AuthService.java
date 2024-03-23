@@ -80,6 +80,7 @@ public class AuthService {
         AuthResponse.TokenDto tokenDto = login(user);
         tokenDto.setUserId(userId);
         tokenDto.setDetails(true);
+        tokenDto.setType("MODEL");
 
         return tokenDto;
     }
@@ -110,6 +111,7 @@ public class AuthService {
         AuthResponse.TokenDto tokenDto = login(user);
         tokenDto.setUserId(userId);
         tokenDto.setDetails(user.getDetails());
+        tokenDto.setType("ARTIST");
 
         return tokenDto;
     }
