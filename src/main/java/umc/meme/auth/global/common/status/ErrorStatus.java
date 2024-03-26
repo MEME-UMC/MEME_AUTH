@@ -1,10 +1,7 @@
 package umc.meme.auth.global.common.status;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.coyote.http2.HpackDecoder;
 import org.springframework.http.HttpStatus;
 import umc.meme.auth.global.common.BaseErrorCode;
 import umc.meme.auth.global.common.ErrorReasonDto;
