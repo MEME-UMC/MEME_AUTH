@@ -1,19 +1,17 @@
-package umc.meme.auth.global.oauth;
+package umc.meme.auth.global.oauth.service;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.io.Decoders;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.AuthException;
-import umc.meme.auth.global.oauth.jwk.JsonWebKey;
+import umc.meme.auth.global.exception.AuthException;
+import umc.meme.auth.global.oauth.jsonwebkey.JsonWebKey;
 
 import java.io.IOException;
 import java.math.BigInteger;

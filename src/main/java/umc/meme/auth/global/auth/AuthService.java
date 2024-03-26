@@ -23,12 +23,12 @@ import umc.meme.auth.global.config.SecurityConfig;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.UserStatus;
 import umc.meme.auth.global.exception.GeneralException;
-import umc.meme.auth.global.exception.handler.AuthException;
+import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
-import umc.meme.auth.global.oauth.OAuthService;
-import umc.meme.auth.global.oauth.apple.AppleAuthService;
-import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
+import umc.meme.auth.global.oauth.service.OAuthService;
+import umc.meme.auth.global.oauth.service.apple.AppleAuthService;
+import umc.meme.auth.global.oauth.service.kakao.KakaoAuthService;
 
 import java.time.LocalDate;
 import java.util.stream.Collectors;

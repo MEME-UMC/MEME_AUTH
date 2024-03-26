@@ -1,7 +1,6 @@
-package umc.meme.auth.global.exception.handler;
+package umc.meme.auth.global.exception;
 
 import umc.meme.auth.global.common.BaseErrorCode;
-import umc.meme.auth.global.exception.GeneralException;
 
 public class AuthException extends GeneralException {
     public AuthException(BaseErrorCode errorCode) {

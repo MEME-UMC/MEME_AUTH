@@ -1,4 +1,4 @@
-package umc.meme.auth.global.oauth.apple;
+package umc.meme.auth.global.oauth.service.apple;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.exception.handler.AuthException;
+import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
-import umc.meme.auth.global.oauth.OAuthService;
-import umc.meme.auth.global.oauth.jwk.PublicKeyDto;
+import umc.meme.auth.global.oauth.service.OAuthService;
+import umc.meme.auth.global.oauth.jsonwebkey.PublicKeyDto;
 
 import java.io.BufferedReader;
 import java.io.IOException;

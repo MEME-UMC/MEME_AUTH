@@ -3,7 +3,7 @@ package umc.meme.auth.global.infra;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Repository;
-import umc.meme.auth.global.oauth.jwk.PublicKeyDto;
+import umc.meme.auth.global.oauth.jsonwebkey.PublicKeyDto;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;

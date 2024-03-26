@@ -10,7 +10,7 @@ import umc.meme.auth.global.auth.dto.AuthResponse;
 import umc.meme.auth.global.common.BaseResponseDto;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.common.status.SuccessStatus;
-import umc.meme.auth.global.exception.handler.AuthException;
+import umc.meme.auth.global.exception.AuthException;
 
 @RequiredArgsConstructor
 @RestController
