@@ -1,4 +1,4 @@
-package umc.meme.auth.global.oauth.jwk;
+package umc.meme.auth.global.oauth.jsonwebkey;
 
 import lombok.Builder;
 import lombok.NoArgsConstructor;

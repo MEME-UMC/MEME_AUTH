@@ -47,11 +47,12 @@ public class SecurityConfig {
                         authorizeHttpRequests
                                 .requestMatchers("/api/v1/signup/model").permitAll()
                                 .requestMatchers("/api/v1/signup/artist").permitAll()
-                                .requestMatchers("/api/v1/auth/artist/extra").permitAll()
                                 .requestMatchers("/api/v1/reissue").permitAll()
+
+                                .requestMatchers("/api/v1/auth/artist/extra").permitAll()
                                 .requestMatchers("/api/v1/auth/logout").permitAll()
                                 .requestMatchers("/api/v1/auth/withdraw").permitAll()
-                                .requestMatchers("/auth/**").permitAll()
+                                .requestMatchers("/api/v2/**").permitAll()
                 );
 
 

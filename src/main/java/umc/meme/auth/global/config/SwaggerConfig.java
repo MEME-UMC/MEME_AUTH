@@ -11,13 +11,13 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SwaggerConfig {
-    // http://localhost:8080/swagger-ui/index.html#/
+    // http://localhost:8080/api/v2/swagger-ui/index.html#/
     @Bean
     public OpenAPI MemeAPI() {
         Info info = new Info()
-                .title("MEME_SERVICE API Docs")
-                .description("MEME_SERVICE API 명세서입니다.")
-                .version("1.0.0");
+                .title("MEME_AUTH API Docs")
+                .description("MEME_AUTH API 명세서")
+                .version("2.0.0");
 
         String jwtSchemeName = "accessToken";
         // API 요청헤더에 인증정보 포함
@@ -32,7 +32,7 @@ public class SwaggerConfig {
                         .bearerFormat("JWT"));
 
         return new OpenAPI()
-                .addServersItem(new Server().url("/auth/swagger-ui/"))
+                .addServersItem(new Server().url("/"))
                 .info(info)
                 .addSecurityItem(securityRequirement)
                 .components(components);

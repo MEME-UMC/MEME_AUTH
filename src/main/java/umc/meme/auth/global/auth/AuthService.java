@@ -23,12 +23,12 @@ import umc.meme.auth.global.config.SecurityConfig;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.UserStatus;
 import umc.meme.auth.global.exception.GeneralException;
-import umc.meme.auth.global.exception.handler.AuthException;
+import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
-import umc.meme.auth.global.oauth.OAuthService;
-import umc.meme.auth.global.oauth.apple.AppleAuthService;
-import umc.meme.auth.global.oauth.kakao.KakaoAuthService;
+import umc.meme.auth.global.oauth.service.OAuthService;
+import umc.meme.auth.global.oauth.service.apple.AppleAuthService;
+import umc.meme.auth.global.oauth.service.kakao.KakaoAuthService;
 
 import java.time.LocalDate;
 import java.util.stream.Collectors;
@@ -63,12 +63,12 @@ public class AuthService {
         User user = Model.builder()
                 .email(userEmail)
                 .provider(modelJoinDto.getProvider())
-                .profileImg(modelJoinDto.getProfileImg())
+                .profileImg(modelJoinDto.getProfile_img())
                 .username(modelJoinDto.getUsername())
                 .nickname(nickName)
                 .gender(modelJoinDto.getGender())
-                .skinType(modelJoinDto.getSkinType())
-                .personalColor(modelJoinDto.getPersonalColor())
+                .skinType(modelJoinDto.getSkin_type())
+                .personalColor(modelJoinDto.getPersonal_color())
                 .password(SecurityConfig.passwordEncoder().encode(userEmail))
                 .role("MODEL")
                 .inactiveDate(LocalDate.of(2099,12,31))
@@ -96,7 +96,7 @@ public class AuthService {
         User user = Artist.builder()
                 .email(userEmail)
                 .provider(artistJoinDto.getProvider())
-                .profileImg(artistJoinDto.getProfileImg())
+                .profileImg(artistJoinDto.getProfile_img())
                 .username(artistJoinDto.getUsername())
                 .nickname(nickName)
                 .password(SecurityConfig.passwordEncoder().encode(userEmail))
@@ -118,7 +118,7 @@ public class AuthService {
 
     @Transactional
     public void signupArtistExtra(AuthRequest.ArtistExtraDto artistExtraDto) {
-        Artist artist = artistRepository.findById(artistExtraDto.getUserId())
+        Artist artist = artistRepository.findById(artistExtraDto.getUser_id())
                 .orElseThrow(() -> new AuthException(ARTIST_NOT_FOUND));
         artist.update(artistExtraDto);
     }
@@ -160,8 +160,8 @@ public class AuthService {
 
     @Transactional
     public AuthResponse.TokenDto reissue(AuthRequest.ReissueDto reissueDto) throws AuthException {
-        String requestAccessToken = reissueDto.getAccessToken();
-        String requestRefreshToken = reissueDto.getRefreshToken();
+        String requestAccessToken = reissueDto.getAccess_token();
+        String requestRefreshToken = reissueDto.getRefresh_token();
 
         Token requestToken = tokenRepository.findByAccessToken(requestAccessToken)
                 .orElseThrow(() -> new AuthException(CANNOT_FOUND_USER));
