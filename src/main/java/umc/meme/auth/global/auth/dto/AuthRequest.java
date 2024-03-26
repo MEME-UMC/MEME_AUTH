@@ -17,13 +17,13 @@ public class AuthRequest {
         private String id_token;
         private Provider provider;
 
-        private String profileImg;
+        private String profile_img;
         private String username;
         private String nickname;
 
         private Gender gender;
-        private SkinType skinType;
-        private PersonalColor personalColor;
+        private SkinType skin_type;
+        private PersonalColor personal_color;
     }
 
     @Data @Builder
@@ -33,7 +33,7 @@ public class AuthRequest {
         private String id_token;
         private Provider provider;
 
-        private String profileImg;
+        private String profile_img;
         private String username;
         private String nickname;
     }
@@ -42,16 +42,16 @@ public class AuthRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ArtistExtraDto {
-        private Long userId;
-        private String profileImg;
+        private Long user_id;
+        private String profile_img;
         private String nickname;
         private Gender gender;
         private String introduction;
-        private WorkExperience workExperience;
+        private WorkExperience work_experience;
         private List<Region> region;
         private List<Category> specialization;
-        private MakeupLocation makeupLocation;
-        private String shopLocation;
+        private MakeupLocation makeup_location;
+        private String shop_location;
         private Map<DayOfWeek, Times> availableDayOfWeekAndTime;
     }
 
@@ -67,8 +67,8 @@ public class AuthRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ReissueDto {
-        private String accessToken;
-        private String refreshToken;
+        private String access_token;
+        private String refresh_token;
     }
 
     @Data @Builder
