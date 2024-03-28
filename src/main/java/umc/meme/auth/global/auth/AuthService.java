@@ -144,20 +144,6 @@ public class AuthService {
         return tokenDto;
     }
 
-    private String getUser(String idToken, Provider provider) throws AuthException {
-        OAuthService oAuthService;
-
-        if (provider.equals(KAKAO)) {
-            oAuthService = new KakaoAuthService(userRepository, redisRepository);
-        } else if (provider.equals(APPLE)) {
-            oAuthService = new AppleAuthService(userRepository, redisRepository);
-        } else {
-            throw new AuthException(PROVIDER_ERROR);
-        }
-
-        return oAuthService.getUserInfo(idToken);
-    }
-
     @Transactional
     public AuthResponse.TokenDto reissue(AuthRequest.ReissueDto reissueDto) throws AuthException {
         String requestAccessToken = reissueDto.getAccess_token();
@@ -196,6 +182,26 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
         userRepository.delete(user);
+    }
+
+    // 회원 등록 여부 조회
+    public void isUserExistsFindByEmail() {
+        // ID 토큰을 파라미터로 받음
+        // 
+    }
+
+    private String getUser(String idToken, Provider provider) throws AuthException {
+        OAuthService oAuthService;
+
+        if (provider.equals(KAKAO)) {
+            oAuthService = new KakaoAuthService(userRepository, redisRepository);
+        } else if (provider.equals(APPLE)) {
+            oAuthService = new AppleAuthService(userRepository, redisRepository);
+        } else {
+            throw new AuthException(PROVIDER_ERROR);
+        }
+
+        return oAuthService.getUserInfo(idToken);
     }
 
     private AuthResponse.TokenDto generateToken(String username, String authorities) {
