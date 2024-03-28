@@ -53,6 +53,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/auth/logout").permitAll()
                                 .requestMatchers("/api/v1/auth/withdraw").permitAll()
                                 .requestMatchers("/api/v2/**").permitAll()
+                                .requestMatchers("/auth/**").permitAll()
                 );
 
 
