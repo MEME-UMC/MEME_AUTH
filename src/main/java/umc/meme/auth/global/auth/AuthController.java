@@ -2,6 +2,8 @@ package umc.meme.auth.global.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/api/v1/auth/artist/extra")
-    public BaseResponseDto signupArtistExtra(@RequestBody AuthRequest.ArtistExtraDto artistExtraDto) throws AuthException {
+    public BaseResponseDto<?> signupArtistExtra(@RequestBody AuthRequest.ArtistExtraDto artistExtraDto) throws AuthException {
         authService.signupArtistExtra(artistExtraDto);
         return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_EXTRA_JOIN_SUCCESS);
     }
@@ -54,5 +56,14 @@ public class AuthController {
     public BaseResponseDto<?> withdraw(HttpServletRequest request) throws AuthException {
         authService.withdraw(request.getHeader("Authorization"));
         return BaseResponseDto.SuccessResponse(SuccessStatus.WITHDRAW_SUCCESS);
+    }
+
+    @GetMapping("/api/v1/check")
+    public BaseResponseDto<?> checkUserExists(@RequestBody AuthRequest.IdTokenDto idTokenDto) throws AuthException {
+        AuthResponse.UserInfoDto userInfoDto = authService.isUserExistsFindByEmail(idTokenDto);
+        if (userInfoDto.isUser())
+            return BaseResponseDto.SuccessResponse(SuccessStatus.USER_EXISTS, userInfoDto);
+        else
+            return BaseResponseDto.SuccessResponse(SuccessStatus.USER_NOT_EXISTS, userInfoDto);
     }
 }
