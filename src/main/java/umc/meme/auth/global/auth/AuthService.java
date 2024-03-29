@@ -31,6 +31,7 @@ import umc.meme.auth.global.oauth.service.apple.AppleAuthService;
 import umc.meme.auth.global.oauth.service.kakao.KakaoAuthService;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static umc.meme.auth.global.common.status.ErrorStatus.*;
@@ -49,6 +50,8 @@ public class AuthService {
     private final RedisRepository redisRepository;
     private final ModelRepository modelRepository;
     private final ArtistRepository artistRepository;
+    private final KakaoAuthService kakaoAuthService;
+    private final AppleAuthService appleAuthService;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
@@ -185,9 +188,34 @@ public class AuthService {
     }
 
     // 회원 등록 여부 조회
-    public void isUserExistsFindByEmail() {
+    @Transactional
+    public AuthResponse.UserInfoDto isUserExistsFindByEmail(AuthRequest.IdTokenDto idTokenDto) {
+        String email = "";
+
+        if (idTokenDto.getProvider() == KAKAO) {
+            email = kakaoAuthService.getUserInfo(idTokenDto.getId_token());
+        } else if (idTokenDto.getProvider() == APPLE) {
+            email = appleAuthService.getUserInfo(idTokenDto.getId_token());
+        }
+
         // ID 토큰을 파라미터로 받음
-        // 
+        // String email = oAuthService.getUserInfo(idToken);
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        AuthResponse.UserInfoDto userInfoDto = new AuthResponse.UserInfoDto();
+
+        if (userOptional.isPresent()) {
+            AuthResponse.TokenDto loginDto = login(userOptional.get());
+
+            userInfoDto.setUser(true);
+            userInfoDto.setUserId(userOptional.get().getUserId());
+            userInfoDto.setAccessToken(loginDto.getAccessToken());
+            userInfoDto.setRefreshToken(loginDto.getRefreshToken());
+        } else {
+            userInfoDto.setUser(false);
+        }
+
+        return userInfoDto;
     }
 
     private String getUser(String idToken, Provider provider) throws AuthException {

@@ -58,14 +58,6 @@ public class AuthRequest {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LoginDto {
-        private String id_token;
-        private Provider provider;
-    }
-
-    @Data @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class ReissueDto {
         private String access_token;
         private String refresh_token;
@@ -83,5 +75,13 @@ public class AuthRequest {
     @AllArgsConstructor
     public static class RefreshTokenDto {
         private String refreshToken;
+    }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class IdTokenDto {
+        private String id_token;
+        private Provider provider;
     }
 }

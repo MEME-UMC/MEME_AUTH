@@ -40,4 +40,14 @@ public class AuthResponse {
     public static class AccessTokenDto {
         private String accessToken;
     }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserInfoDto {
+        private boolean isUser;
+        private Long userId;
+        private String accessToken;
+        private String refreshToken;
+    }
 }
