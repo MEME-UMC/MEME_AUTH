@@ -58,7 +58,7 @@ public class AuthController {
         return BaseResponseDto.SuccessResponse(SuccessStatus.WITHDRAW_SUCCESS);
     }
 
-    @GetMapping("/api/v1/check")
+    @PostMapping("/api/v1/check")
     public BaseResponseDto<?> checkUserExists(@RequestBody AuthRequest.IdTokenDto idTokenDto) throws AuthException {
         AuthResponse.UserInfoDto userInfoDto = authService.isUserExistsFindByEmail(idTokenDto);
         if (userInfoDto.isUser())
