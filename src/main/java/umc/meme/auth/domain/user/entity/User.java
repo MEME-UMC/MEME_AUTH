@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import umc.meme.auth.domain.common.BaseTimeEntity;
 import umc.meme.auth.global.enums.Gender;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.UserStatus;
@@ -21,7 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
-public class User extends BaseTimeEntity {
+public class User {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
