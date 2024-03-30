@@ -209,6 +209,7 @@ public class AuthService {
 
             userInfoDto.setUser(true);
             userInfoDto.setUserId(userOptional.get().getUserId());
+            userInfoDto.setRole(userOptional.get().getRole());
             userInfoDto.setAccessToken(loginDto.getAccessToken());
             userInfoDto.setRefreshToken(loginDto.getRefreshToken());
         } else {

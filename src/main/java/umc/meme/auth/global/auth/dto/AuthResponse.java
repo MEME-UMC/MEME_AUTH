@@ -47,6 +47,7 @@ public class AuthResponse {
     public static class UserInfoDto {
         private boolean isUser;
         private Long userId;
+        private String role;
         private String accessToken;
         private String refreshToken;
     }
