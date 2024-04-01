@@ -70,15 +70,6 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    public long getTokenExpirationTime(String token) {
-        return getClaims(token).getExpiration().getTime();
-    }
-
-    public boolean isTokenExpired(String token) {
-        Long now = System.currentTimeMillis();
-        return getClaims(token).getExpiration().getTime() > now;
-    }
-
     private String createAccessToken(String username, String authorities, Long now) {
         return Jwts.builder()
                 .setHeaderParam("alg", "HS512")
