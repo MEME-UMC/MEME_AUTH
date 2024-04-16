@@ -47,7 +47,7 @@ public class KakaoAuthService extends OAuthService {
         Optional<PublicKeyDto> kakaoPublicKeyDto = redisRepository.findPublicKey(PROVIDER);
 
         // 공개 키 목록이 저장되어 있지 않다면 GET 요청 보내서 공개 키 세팅 (공개 키 캐시 여부 확인)
-        if (kakaoPublicKeyDto.get().getKey() == null)
+        if (kakaoPublicKeyDto.get().getKey() == null)  // Modified from kakaoPublicKeyDto.isEmpty()
             setPublicKeys();
 
         // 공개 키 목록이 저장되어 있다면 키 목록 가져오고 파싱 진행
@@ -99,7 +99,6 @@ public class KakaoAuthService extends OAuthService {
                     .key(jsonData)
                     .build());
         } else {
-            System.out.println("RESPONSE_CODE = " + responseCode);
             throw new IOException();
         }
     }

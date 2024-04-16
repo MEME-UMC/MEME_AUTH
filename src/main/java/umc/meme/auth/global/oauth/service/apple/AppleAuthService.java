@@ -43,10 +43,10 @@ public class AppleAuthService extends OAuthService {
     @Override
     protected String getJsonWebKeys() throws IOException {
         // Redis 안에 캐시 값으로 카카오 OIDC 공개 키 목록이 저장되어 있는지 확인
-        Optional<PublicKeyDto> kakaoPublicKeyDto = redisRepository.findPublicKey(PROVIDER);
+        Optional<PublicKeyDto> applePublicKeyDto = redisRepository.findPublicKey(PROVIDER);
 
         // 공개 키 목록이 저장되어 있지 않다면 GET 요청 보내서 공개 키 세팅 (공개 키 캐시 여부 확인)
-        if (kakaoPublicKeyDto.get().getKey() == null)
+        if (applePublicKeyDto.get().getKey() == null)
             setPublicKeys();
 
         // 공개 키 목록이 저장되어 있다면 키 목록 가져오고 파싱 진행

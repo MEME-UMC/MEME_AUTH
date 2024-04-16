@@ -223,6 +223,7 @@ public class AuthService {
         OAuthService oAuthService;
 
         if (provider.equals(KAKAO)) {
+            System.out.println("AuthService.getUser.KAKAO");
             oAuthService = new KakaoAuthService(userRepository, redisRepository);
         } else if (provider.equals(APPLE)) {
             oAuthService = new AppleAuthService(userRepository, redisRepository);
