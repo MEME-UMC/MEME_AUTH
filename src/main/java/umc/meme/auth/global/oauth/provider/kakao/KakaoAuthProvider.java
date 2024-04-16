@@ -1,15 +1,14 @@
-package umc.meme.auth.global.oauth.service.apple;
+package umc.meme.auth.global.oauth.provider.kakao;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
-import umc.meme.auth.global.oauth.service.OAuthService;
 import umc.meme.auth.global.oauth.jsonwebkey.PublicKeyDto;
+import umc.meme.auth.global.oauth.provider.OAuthProvider;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,21 +21,21 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AppleAuthService extends OAuthService {
+public class KakaoAuthProvider extends OAuthProvider {
 
-    private static final String REQUEST_URL = "https://appleid.apple.com/auth/keys";
-    private static final String PROVIDER = "APPLE";
+    // 이런 변수 처리는 여기서 하고 싶었음
+    private static final String REQUEST_URL = "https://kauth.kakao.com/.well-known/jwks.json";
+    private static final String PROVIDER = "KAKAO";
 
-    @Value("${spring.security.oauth2.apple.issuer}")
+    @Value("${spring.security.oauth2.kakao.issuer}")
     private String issuer;
 
-    @Value("${spring.security.oauth2.apple.client-id}")
+    @Value("${spring.security.oauth2.kakao.rest-api-key}")
     private String restApiKey;
 
     private final RedisRepository redisRepository;
 
-    public AppleAuthService(UserRepository userRepository, RedisRepository redisRepository) {
-        super(userRepository);
+    public KakaoAuthProvider(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 
@@ -46,7 +45,7 @@ public class AppleAuthService extends OAuthService {
         Optional<PublicKeyDto> kakaoPublicKeyDto = redisRepository.findPublicKey(PROVIDER);
 
         // 공개 키 목록이 저장되어 있지 않다면 GET 요청 보내서 공개 키 세팅 (공개 키 캐시 여부 확인)
-        if (kakaoPublicKeyDto.get().getKey() == null)
+        if (kakaoPublicKeyDto.get().getKey() == null)  // Modified from kakaoPublicKeyDto.isEmpty()
             setPublicKeys();
 
         // 공개 키 목록이 저장되어 있다면 키 목록 가져오고 파싱 진행
@@ -98,9 +97,7 @@ public class AppleAuthService extends OAuthService {
                     .key(jsonData)
                     .build());
         } else {
-            System.out.println("RESPONSE_CODE = " + responseCode);
             throw new IOException();
         }
     }
 }
-

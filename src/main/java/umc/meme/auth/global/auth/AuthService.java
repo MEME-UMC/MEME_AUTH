@@ -26,9 +26,9 @@ import umc.meme.auth.global.exception.GeneralException;
 import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
-import umc.meme.auth.global.oauth.service.OAuthService;
-import umc.meme.auth.global.oauth.service.apple.AppleAuthService;
-import umc.meme.auth.global.oauth.service.kakao.KakaoAuthService;
+import umc.meme.auth.global.oauth.provider.OAuthProvider;
+import umc.meme.auth.global.oauth.provider.apple.AppleAuthProvider;
+import umc.meme.auth.global.oauth.provider.kakao.KakaoAuthProvider;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -50,8 +50,8 @@ public class AuthService {
     private final RedisRepository redisRepository;
     private final ModelRepository modelRepository;
     private final ArtistRepository artistRepository;
-    private final KakaoAuthService kakaoAuthService;
-    private final AppleAuthService appleAuthService;
+    private final KakaoAuthProvider kakaoAuthProvider;
+    private final AppleAuthProvider appleAuthProvider;
 
     private final static String TOKEN_PREFIX = "Bearer ";
 
@@ -193,9 +193,9 @@ public class AuthService {
         String email = "";
 
         if (idTokenDto.getProvider() == KAKAO) {
-            email = kakaoAuthService.getUserInfo(idTokenDto.getId_token());
+            email = kakaoAuthProvider.getUserInfo(idTokenDto.getId_token());
         } else if (idTokenDto.getProvider() == APPLE) {
-            email = appleAuthService.getUserInfo(idTokenDto.getId_token());
+            email = appleAuthProvider.getUserInfo(idTokenDto.getId_token());
         }
 
         // ID 토큰을 파라미터로 받음
@@ -219,18 +219,18 @@ public class AuthService {
         return userInfoDto;
     }
 
-    private String getUser(String idToken, Provider provider) throws AuthException {
-        OAuthService oAuthService;
+    protected String getUser(String idToken, Provider provider) throws AuthException {
+        OAuthProvider oAuthProvider;
 
         if (provider.equals(KAKAO)) {
-            oAuthService = new KakaoAuthService(userRepository, redisRepository);
+            oAuthProvider = new KakaoAuthProvider(redisRepository);
         } else if (provider.equals(APPLE)) {
-            oAuthService = new AppleAuthService(userRepository, redisRepository);
+            oAuthProvider = new AppleAuthProvider(redisRepository);
         } else {
             throw new AuthException(PROVIDER_ERROR);
         }
 
-        return oAuthService.getUserInfo(idToken);
+        return oAuthProvider.getUserInfo(idToken);
     }
 
     private AuthResponse.TokenDto generateToken(String username, String authorities) {
