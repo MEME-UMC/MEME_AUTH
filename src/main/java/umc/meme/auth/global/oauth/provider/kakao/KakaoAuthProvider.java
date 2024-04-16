@@ -1,15 +1,14 @@
-package umc.meme.auth.global.oauth.service.kakao;
+package umc.meme.auth.global.oauth.provider.kakao;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
-import umc.meme.auth.global.oauth.service.OAuthService;
 import umc.meme.auth.global.oauth.jsonwebkey.PublicKeyDto;
+import umc.meme.auth.global.oauth.provider.OAuthProvider;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class KakaoAuthService extends OAuthService {
+public class KakaoAuthProvider extends OAuthProvider {
 
     // 이런 변수 처리는 여기서 하고 싶었음
     private static final String REQUEST_URL = "https://kauth.kakao.com/.well-known/jwks.json";
@@ -36,7 +35,7 @@ public class KakaoAuthService extends OAuthService {
 
     private final RedisRepository redisRepository;
 
-    public KakaoAuthService(RedisRepository redisRepository) {
+    public KakaoAuthProvider(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 

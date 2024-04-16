@@ -1,4 +1,4 @@
-package umc.meme.auth.global.oauth.service;
+package umc.meme.auth.global.oauth.provider;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -24,7 +24,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public abstract class OAuthService {
+public abstract class OAuthProvider {
 
     @Transactional
     public String getUserInfo(String idToken) throws AuthException {
