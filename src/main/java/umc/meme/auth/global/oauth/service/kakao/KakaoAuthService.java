@@ -36,8 +36,7 @@ public class KakaoAuthService extends OAuthService {
 
     private final RedisRepository redisRepository;
 
-    public KakaoAuthService(UserRepository userRepository, RedisRepository redisRepository) {
-        super(userRepository);
+    public KakaoAuthService(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 

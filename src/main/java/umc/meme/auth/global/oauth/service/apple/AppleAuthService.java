@@ -35,8 +35,7 @@ public class AppleAuthService extends OAuthService {
 
     private final RedisRepository redisRepository;
 
-    public AppleAuthService(UserRepository userRepository, RedisRepository redisRepository) {
-        super(userRepository);
+    public AppleAuthService(RedisRepository redisRepository) {
         this.redisRepository = redisRepository;
     }
 

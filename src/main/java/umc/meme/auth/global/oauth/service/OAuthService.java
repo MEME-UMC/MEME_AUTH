@@ -8,7 +8,6 @@ import io.jsonwebtoken.io.Decoders;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.oauth.jsonwebkey.JsonWebKey;
@@ -26,8 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public abstract class OAuthService {
-
-    private final UserRepository userRepository;
 
     @Transactional
     public String getUserInfo(String idToken) throws AuthException {
@@ -62,8 +59,6 @@ public abstract class OAuthService {
         }
 
         return userEmail;
-
-        // return userRepository.findByEmail(userEmail).orElseThrow(() -> new EntityNotFoundException("Email not found"));
     }
 
     private String getKidFromToken(String idToken) throws AuthException {
