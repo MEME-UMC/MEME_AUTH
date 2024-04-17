@@ -84,4 +84,11 @@ public class AuthRequest {
         private String id_token;
         private Provider provider;
     }
+
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NicknameDto {
+        private String nickname;
+    }
 }

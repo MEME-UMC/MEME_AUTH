@@ -58,17 +58,13 @@ public class AuthService {
     @Transactional
     public AuthResponse.TokenDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) {
         String userEmail = getUser(modelJoinDto.getId_token(), modelJoinDto.getProvider());
-        String nickName = modelJoinDto.getNickname();
-
-        if(userRepository.existsByNickname(nickName))
-            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
 
         User user = Model.builder()
                 .email(userEmail)
                 .provider(modelJoinDto.getProvider())
                 .profileImg(modelJoinDto.getProfile_img())
                 .username(modelJoinDto.getUsername())
-                .nickname(nickName)
+                .nickname(modelJoinDto.getNickname())
                 .gender(modelJoinDto.getGender())
                 .skinType(modelJoinDto.getSkin_type())
                 .personalColor(modelJoinDto.getPersonal_color())
@@ -92,9 +88,6 @@ public class AuthService {
     public AuthResponse.TokenDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) {
         String userEmail = getUser(artistJoinDto.getId_token(), artistJoinDto.getProvider());
         String nickName = artistJoinDto.getNickname();
-
-        if(userRepository.existsByNickname(nickName))
-            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
 
         User user = Artist.builder()
                 .email(userEmail)
@@ -189,7 +182,7 @@ public class AuthService {
 
     // 회원 등록 여부 조회
     @Transactional
-    public AuthResponse.UserInfoDto isUserExistsFindByEmail(AuthRequest.IdTokenDto idTokenDto) {
+    public AuthResponse.UserInfoDto checkUserExistsFindByEmail(AuthRequest.IdTokenDto idTokenDto) {
         String email = "";
 
         if (idTokenDto.getProvider() == KAKAO) {
@@ -217,6 +210,11 @@ public class AuthService {
         }
 
         return userInfoDto;
+    }
+
+    @Transactional
+    public boolean checkNicknameDuplicate(AuthRequest.NicknameDto nicknameDto) {
+        return userRepository.existsByNickname(nicknameDto.getNickname());
     }
 
     protected String getUser(String idToken, Provider provider) throws AuthException {
