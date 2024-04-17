@@ -26,7 +26,6 @@ public class EmbeddedRedisConfig {
         int port = isRedisRunning() ? findAvailablePort() : redisPort;
 
         if (isArmMac()) {
-            System.out.println("EmbeddedRedisConfig.redisServer");
             redisServer = new RedisServer(getRedisFileForArcMac(), port);
         } else {
             redisServer = RedisServer.builder()
