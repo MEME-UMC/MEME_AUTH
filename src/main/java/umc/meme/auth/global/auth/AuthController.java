@@ -66,7 +66,7 @@ public class AuthController {
     public BaseResponseDto<?> reissue(@RequestBody AuthRequest.ReissueDto reissueDto) throws AuthException {
         AuthResponse.TokenDto reissueResult = authService.reissue(reissueDto);
 
-        if (reissueResult.getAccessToken() == null)
+        if (reissueResult.getAccess_token() == null)
             return BaseResponseDto.ErrorResponse(ErrorStatus.CANNOT_REISSUE_JWT_TOKEN);
 
         return BaseResponseDto.SuccessResponse(SuccessStatus.REISSUE_SUCCESS, reissueResult);

@@ -67,14 +67,14 @@ public class AuthRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AccessTokenDto {
-        private String accessToken;
+        private String access_token;
     }
 
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class RefreshTokenDto {
-        private String refreshToken;
+        private String refresh_token;
     }
 
     @Data @Builder

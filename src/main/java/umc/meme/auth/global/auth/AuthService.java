@@ -18,11 +18,8 @@ import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
-import umc.meme.auth.global.common.status.ErrorStatus;
 import umc.meme.auth.global.config.SecurityConfig;
 import umc.meme.auth.global.enums.Provider;
-import umc.meme.auth.global.enums.UserStatus;
-import umc.meme.auth.global.exception.GeneralException;
 import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
@@ -30,7 +27,6 @@ import umc.meme.auth.global.oauth.provider.OAuthProvider;
 import umc.meme.auth.global.oauth.provider.apple.AppleAuthProvider;
 import umc.meme.auth.global.oauth.provider.kakao.KakaoAuthProvider;
 
-import java.time.LocalDate;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -54,60 +50,58 @@ public class AuthService {
     private final AppleAuthProvider appleAuthProvider;
 
     private final static String TOKEN_PREFIX = "Bearer ";
+    private final static String ROLE_MODEL = "MODEL";
+    private final static String ROLE_ARTIST = "ARTIST";
 
     @Transactional
     public AuthResponse.TokenDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) {
-        String userEmail = getUser(modelJoinDto.getId_token(), modelJoinDto.getProvider());
+        String userEmail = getUserEmail(modelJoinDto.getId_token(), modelJoinDto.getProvider());
 
-        User user = Model.builder()
+        Model user = Model.builder()
+                .role(ROLE_MODEL)
                 .email(userEmail)
                 .provider(modelJoinDto.getProvider())
                 .profileImg(modelJoinDto.getProfile_img())
                 .username(modelJoinDto.getUsername())
                 .nickname(modelJoinDto.getNickname())
+                .password(SecurityConfig.passwordEncoder().encode(userEmail))
+                .details(true)
                 .gender(modelJoinDto.getGender())
                 .skinType(modelJoinDto.getSkin_type())
                 .personalColor(modelJoinDto.getPersonal_color())
-                .password(SecurityConfig.passwordEncoder().encode(userEmail))
-                .role("MODEL")
-                .inactiveDate(LocalDate.of(2099,12,31))
-                .userStatus(UserStatus.ACTIVE)
                 .build();
 
-        Long userId = modelRepository.save((Model) user).getUserId();
+        Long userId = modelRepository.save(user).getUserId();
 
         AuthResponse.TokenDto tokenDto = login(user);
-        tokenDto.setUserId(userId);
-        tokenDto.setDetails(true);
-        tokenDto.setType("MODEL");
+        tokenDto.setUser_id(userId);
+        tokenDto.setDetails(user.getDetails());
+        tokenDto.setType(ROLE_MODEL);
 
         return tokenDto;
     }
 
     @Transactional
     public AuthResponse.TokenDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) {
-        String userEmail = getUser(artistJoinDto.getId_token(), artistJoinDto.getProvider());
-        String nickName = artistJoinDto.getNickname();
+        String userEmail = getUserEmail(artistJoinDto.getId_token(), artistJoinDto.getProvider());
 
-        User user = Artist.builder()
+        Artist user = Artist.builder()
+                .role(ROLE_ARTIST)
                 .email(userEmail)
                 .provider(artistJoinDto.getProvider())
                 .profileImg(artistJoinDto.getProfile_img())
                 .username(artistJoinDto.getUsername())
-                .nickname(nickName)
+                .nickname(artistJoinDto.getNickname())
                 .password(SecurityConfig.passwordEncoder().encode(userEmail))
-                .role("ARTIST")
                 .details(false)
-                .inactiveDate(LocalDate.of(2099,12,31))
-                .userStatus(UserStatus.ACTIVE)
                 .build();
 
-        Long userId = artistRepository.save((Artist) user).getUserId();
+        Long userId = artistRepository.save(user).getUserId();
 
         AuthResponse.TokenDto tokenDto = login(user);
-        tokenDto.setUserId(userId);
+        tokenDto.setUser_id(userId);
         tokenDto.setDetails(user.getDetails());
-        tokenDto.setType("ARTIST");
+        tokenDto.setType(ROLE_ARTIST);
 
         return tokenDto;
     }
@@ -131,13 +125,10 @@ public class AuthService {
             throw new LockedException("LOCKED_EXCEPTION", exception);
         } catch (BadCredentialsException exception) {
             throw new BadCredentialsException("BAD_CREDENTIALS_EXCEPTION", exception);
-        } catch (AuthException exception) {
-            throw exception;
         }
 
         UserDetails userDetails = principalDetailsService.loadUserByUsername(user.getUsername());
-        AuthResponse.TokenDto tokenDto = generateToken(userDetails.getUsername(), getAuthorities(authentication));
-        return tokenDto;
+        return generateToken(userDetails.getUsername(), getAuthorities(authentication));
     }
 
     @Transactional
@@ -149,17 +140,21 @@ public class AuthService {
                 .orElseThrow(() -> new AuthException(CANNOT_FOUND_USER));
 
         if (requestToken.getRefreshToken() == null) {
-            deleteRefreshToken(requestAccessToken);
+            // Case 1 : refresh token을 가지고 있지 않은 경우
+            deleteTokenPairInRedis(requestAccessToken);
             throw new AuthException(NO_REFRESH_TOKEN);
-        }
-
-        if (!requestToken.getRefreshToken().equals(requestRefreshToken)) {
-            deleteRefreshToken(requestAccessToken);
+        } else if (!requestToken.getRefreshToken().equals(requestRefreshToken)) {
+            // Case 2 : access token과 refresh token이 일치하지 않는 경우 -> 토큰 탈취 가능성 존재
+            deleteTokenPairInRedis(requestAccessToken);
             throw new AuthException(ANOTHER_USER);
+        } else {
+            // Case 3 : 정상적인 경우
+            deleteTokenPairInRedis(requestAccessToken);
         }
 
-        deleteRefreshToken(requestAccessToken);
         Authentication authentication = jwtTokenProvider.getAuthentication(requestAccessToken);
+
+        // login 부분이랑 비슷하네
         UserDetails userDetails = principalDetailsService.loadUserByUsername(authentication.getName());
         return generateToken(userDetails.getUsername(), getAuthorities(authentication));
     }
@@ -167,7 +162,7 @@ public class AuthService {
     @Transactional
     public void logout(String requestHeader) throws AuthException {
         String requestAccessToken = resolveToken(requestHeader);
-        deleteRefreshToken(requestAccessToken);
+        deleteTokenPairInRedis(requestAccessToken);
         SecurityContextHolder.clearContext();
     }
 
@@ -192,7 +187,6 @@ public class AuthService {
         }
 
         // ID 토큰을 파라미터로 받음
-        // String email = oAuthService.getUserInfo(idToken);
         Optional<User> userOptional = userRepository.findByEmail(email);
 
         AuthResponse.UserInfoDto userInfoDto = new AuthResponse.UserInfoDto();
@@ -201,10 +195,10 @@ public class AuthService {
             AuthResponse.TokenDto loginDto = login(userOptional.get());
 
             userInfoDto.setUser(true);
-            userInfoDto.setUserId(userOptional.get().getUserId());
+            userInfoDto.setUser_id(userOptional.get().getUserId());
             userInfoDto.setRole(userOptional.get().getRole());
-            userInfoDto.setAccessToken(loginDto.getAccessToken());
-            userInfoDto.setRefreshToken(loginDto.getRefreshToken());
+            userInfoDto.setAccess_token(loginDto.getAccess_token());
+            userInfoDto.setRefresh_token(loginDto.getRefresh_token());
         } else {
             userInfoDto.setUser(false);
         }
@@ -217,7 +211,7 @@ public class AuthService {
         return userRepository.existsByNickname(nicknameDto.getNickname());
     }
 
-    protected String getUser(String idToken, Provider provider) throws AuthException {
+    private String getUserEmail(String idToken, Provider provider) throws AuthException {
         OAuthProvider oAuthProvider;
 
         if (provider.equals(KAKAO)) {
@@ -233,24 +227,24 @@ public class AuthService {
 
     private AuthResponse.TokenDto generateToken(String username, String authorities) {
         AuthResponse.TokenDto tokenDto = jwtTokenProvider.createToken(username, authorities);
-        saveRefreshToken(tokenDto.getAccessToken(), tokenDto.getRefreshToken());
+        saveTokenPairInRedis(tokenDto.getAccess_token(), tokenDto.getRefresh_token());
         return tokenDto;
     }
 
-    private void saveRefreshToken(String accessToken, String refreshToken) {
+    private void saveTokenPairInRedis(String accessToken, String refreshToken) {
         tokenRepository.save(Token.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build());
     }
 
-    private void deleteRefreshToken(String accessToken) throws AuthException {
+    private void deleteTokenPairInRedis(String accessToken) throws AuthException {
         Token findToken = tokenRepository.findByAccessToken(accessToken)
                 .orElseThrow(() -> new AuthException(TOKEN_MISMATCH_EXCEPTION));
         tokenRepository.delete(findToken);
     }
 
-    public String getAuthorities(Authentication authentication) {
+    private String getAuthorities(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));

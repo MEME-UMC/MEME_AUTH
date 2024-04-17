@@ -29,13 +29,6 @@ public class JwtTokenProvider {
         return new AuthResponse.TokenDto(accessToken, refreshToken);
     }
 
-    @Transactional
-    public AuthResponse.AccessTokenDto reissueAccessToken(String username, String authorities) {
-        Long now = System.currentTimeMillis();
-        String accessToken = createAccessToken(username, authorities, now);
-        return new AuthResponse.AccessTokenDto(accessToken);
-    }
-
     public boolean validateAccessToken(String accessToken) {
         try {
             Jwts.parserBuilder()

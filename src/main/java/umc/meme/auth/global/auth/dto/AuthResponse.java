@@ -10,19 +10,19 @@ public class AuthResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class TokenDto {
-        private Long userId;
-        private String accessToken;
-        private String refreshToken;
+        private String access_token;
+        private String refresh_token;
+        private Long user_id;
         private boolean details;
         private String type;
 
-        public TokenDto(String accessToken, String refreshToken) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
+        public TokenDto(String access_token, String refresh_token) {
+            this.access_token = access_token;
+            this.refresh_token = refresh_token;
         }
 
-        public void setUserId(Long userId) {
-            this.userId = userId;
+        public void setUser_id(Long userId) {
+            this.user_id = userId;
         }
 
         public void setDetails(boolean details) {
@@ -38,17 +38,17 @@ public class AuthResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AccessTokenDto {
-        private String accessToken;
+        private String access_token;
     }
 
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserInfoDto {
+        private String access_token;
+        private String refresh_token;
         private boolean isUser;
-        private Long userId;
+        private Long user_id;
         private String role;
-        private String accessToken;
-        private String refreshToken;
     }
 }
