@@ -26,7 +26,7 @@ public class AuthController {
      * @throws AuthException
      */
     @PostMapping("/api/v1/signup/model")
-    public BaseResponseDto<AuthResponse.TokenDto> signupModel(@RequestBody AuthRequest.ModelJoinDto modelJoinDto) throws AuthException{
+    public BaseResponseDto<AuthResponse.JoinDto> signupModel(@RequestBody AuthRequest.ModelJoinDto modelJoinDto) throws AuthException{
         return BaseResponseDto.SuccessResponse(SuccessStatus.MODEL_JOIN_SUCCESS, authService.signupModel(modelJoinDto));
     }
 
@@ -38,22 +38,23 @@ public class AuthController {
      * @throws AuthException
      */
     @PostMapping("/api/v1/signup/artist")
-    public BaseResponseDto<AuthResponse.TokenDto> signupArtist(@RequestBody AuthRequest.ArtistJoinDto artistJoinDto) throws AuthException {
+    public BaseResponseDto<AuthResponse.JoinDto> signupArtist(@RequestBody AuthRequest.ArtistJoinDto artistJoinDto) throws AuthException {
         return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_JOIN_SUCCESS, authService.signupArtist(artistJoinDto));
     }
 
     /**
      * 아티스트 회원가입 시, 추가 정보를 받는 컨트롤러입니다.
+     * 현재 API 중단 상태 -> 추후 리팩토링 예정
      *
      * @param artistExtraDto
      * @return
      * @throws AuthException
      */
-    @PostMapping("/api/v1/auth/artist/extra")
-    public BaseResponseDto<?> signupArtistExtra(@RequestBody AuthRequest.ArtistExtraDto artistExtraDto) throws AuthException {
-        authService.signupArtistExtra(artistExtraDto);
-        return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_EXTRA_JOIN_SUCCESS);
-    }
+//    @PostMapping("/api/v1/auth/artist/extra")
+//    public BaseResponseDto<?> signupArtistExtra(@RequestBody AuthRequest.ArtistExtraDto artistExtraDto) throws AuthException {
+//        authService.signupArtistExtra(artistExtraDto);
+//        return BaseResponseDto.SuccessResponse(SuccessStatus.ARTIST_EXTRA_JOIN_SUCCESS);
+//    }
 
     /**
      * 토큰 재발급 컨트롤러입니다.
@@ -107,7 +108,7 @@ public class AuthController {
     @PostMapping("/api/v1/check/user")
     public BaseResponseDto<?> checkUserExists(@RequestBody AuthRequest.IdTokenDto idTokenDto) {
         AuthResponse.UserInfoDto userInfoDto = authService.checkUserExistsFindByEmail(idTokenDto);
-        if (userInfoDto.isUser())
+        if (userInfoDto.isUser_status())
             return BaseResponseDto.SuccessResponse(SuccessStatus.USER_EXISTS, userInfoDto);
         else
             return BaseResponseDto.ErrorResponse(ErrorStatus.USER_NOT_EXISTS, userInfoDto);
