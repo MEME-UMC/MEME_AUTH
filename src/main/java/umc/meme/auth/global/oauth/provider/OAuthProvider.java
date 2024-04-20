@@ -27,7 +27,7 @@ import java.util.List;
 public abstract class OAuthProvider {
 
     @Transactional
-    public String getUserInfo(String idToken) throws AuthException {
+    public String getUserEmail(String idToken) throws AuthException {
         String userEmail = null;
 
         try {

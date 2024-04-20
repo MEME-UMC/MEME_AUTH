@@ -26,6 +26,9 @@ public class BaseResponseDto<T> {
         return new BaseResponseDto<>(status.getCode(), "SUCCESS", status.getMessage(), "");
     }
 
+    public static <T>BaseResponseDto<T> ErrorResponse(ErrorStatus status, T data) {
+        return new BaseResponseDto<>(status.getCode(), "FAILURE", status.getMessage(), data);
+    }
     public static BaseResponseDto ErrorResponse(ErrorStatus status) {
         return new BaseResponseDto<>(status.getCode(), "FAILURE", status.getMessage(), "");
     }

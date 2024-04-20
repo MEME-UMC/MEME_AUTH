@@ -15,10 +15,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED,401,"인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, 403, "금지된 요청입니다."),
 
-    // 멤버 관려 에러
+    // 멤버 관련 에러
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, 401, "사용자가 없습니다."),
-    NICKNAME_NOT_EXIST(HttpStatus.BAD_REQUEST, 402, "닉네임은 필수 입니다."),
-    NICKNAME_DUPLICATED(HttpStatus.BAD_REQUEST, 402, "중복된 닉네임입니다."),
+    USER_NOT_EXISTS(HttpStatus.NOT_FOUND, 404, "존재하지 않는 사용자입니다."),
+    NICKNAME_EXISTS(HttpStatus.CONFLICT, 409, "이미 존재하는 닉네임입니다."),
 
     // Artist 관련 에러
     ARTIST_NOT_FOUND(HttpStatus.NOT_FOUND, 401, "Artist 정보가 존재하지 않습니다."),
