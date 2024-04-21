@@ -6,94 +6,131 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import umc.meme.auth.domain.artist.entity.Artist;
+import umc.meme.auth.domain.artist.entity.ArtistRepository;
+import umc.meme.auth.domain.model.entity.Model;
 import umc.meme.auth.domain.model.entity.ModelRepository;
+import umc.meme.auth.domain.token.entity.TokenRepository;
+import umc.meme.auth.domain.user.entity.User;
+import umc.meme.auth.global.auth.converter.UserConverter;
 import umc.meme.auth.global.auth.dto.AuthRequest;
-import umc.meme.auth.global.auth.dto.AuthResponse;
-import umc.meme.auth.global.config.EmbeddedRedisConfig;
-import umc.meme.auth.global.config.RedisConfig;
 import umc.meme.auth.global.enums.Gender;
 import umc.meme.auth.global.enums.PersonalColor;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.SkinType;
-import umc.meme.auth.global.infra.RedisRepository;
-import umc.meme.auth.global.oauth.service.OAuthService;
-import umc.meme.auth.global.oauth.service.kakao.KakaoAuthService;
+import umc.meme.auth.global.jwt.JwtTokenProvider;
 
-import java.io.IOException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
+    @InjectMocks
+    private AuthService authService;
     @Mock
     private ModelRepository modelRepository;
     @Mock
-    private RedisRepository redisRepository;
+    private ArtistRepository artistRepository;
     @Mock
-    private KakaoAuthService kakaoAuthService;
+    private JwtTokenProvider jwtTokenProvider;
     @Mock
-    private OAuthService oAuthService;
+    private TokenRepository tokenRepository;
     @Mock
-    private EmbeddedRedisConfig embeddedRedisConfig;
-    @Mock
-    private RedisConfig redisConfig;
-    @InjectMocks
-    private AuthService authService;
+    private AuthenticationManager authenticationManager;
 
     @Test
-    @DisplayName("모델 회원가입 - 정상")
-    void When_ModelNicknameUnique_Expect_ReturnTokenDto() throws IOException {
+    @DisplayName("모델 저장")
+    void When_JoinModel_Expect_SaveModel() {
         // given
-        Long userId = 1L;
-        AuthRequest.ModelJoinDto modelJoinDto = AuthRequest.ModelJoinDto.builder()
-                .id_token("eyJraWQiOiI5ZjI1MmRhZGQ1ZjIzM2Y5M2QyZmE1MjhkMTJmZWEiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIzZDliYTI3ZTc5ZTY0Y2Y4NTdlOGU5MWJiZmM4ODM0NiIsInN1YiI6IjMzMjE5NDYxNTYiLCJhdXRoX3RpbWUiOjE3MTMxNDczODMsImlzcyI6Imh0dHBzOi8va2F1dGgua2FrYW8uY29tIiwibmlja25hbWUiOiLsnoTsnqzsmIEiLCJleHAiOjE3MTMxNjg5ODMsImlhdCI6MTcxMzE0NzM4MywiZW1haWwiOiJsaW1qeWp1c3RpbkBuYXZlci5jb20ifQ.M2gnAzq4kpCwVtGbbSIc-gArKLLlu3MXjahKK-zO-TxhkcLbl_2PC061Dapde1qJjuEKIRoTjzSWWrOk9GFgPeBu_01bFysujJOJdrwXmHd8jJtINFfBP_JDIkXDh4tqIc6BxqBHsq6VD8V1hebf9k7547XTZ3Fh8boNpA-vNHyvhUJwZW1BKUx4vNrK8nxSku3eCAJbOEidVYCKT_zEbAgQwWhSiskDO7E2mGnNeM0hYygGvDt8LHPFwPGcKaTs9YXcoV5X2AleLauSZLO70nJ3fAX6DkCOSSBU_dy2W8zjqP-nNXAMAh-MgbEonl4U-uM-fkjQmlTsM2mKErTUUA")
-                .provider(Provider.KAKAO)
-                .profile_img("profileImgLink")
-                .username("임재영")
-                .nickname("제이스")
-                .gender(Gender.MALE)
-                .skin_type(SkinType.DRY)
-                .personal_color(PersonalColor.AUTUMN)
-                .build();
+        String userName = "GEN Chovy";
+        String userEmail = "test@naver.com";
 
-        // 이게 어느 동작을 정의해주는지 모르겠네
-        // 서비스 안에서 굴러가는 Repository 메서드에 대한건지
-        // 아니면 이 메서드 안에 있는 것들에 대한 동작을 정의해주는건지
-        // Mockito.when(new Model().getUserId()).thenReturn(userId);
+        AuthRequest.ModelJoinDto modelJoinDto = createModelJoinDto(userName);
+        Model model = UserConverter.toModel(modelJoinDto, userEmail, "MODEL");
 
-        // 뭔가 새로운 방법으로 테스트 방식을 고안해야 할 것 같아
-        // 일단 Redis 안에 데이터가 저장되는지부터 봐야할듯
-        // 그리고 Redis 사용하지 않아도 테스트 할 수 있는 방법 생각해보기
-        // 이렇게 JWT 토큰 있는 것들은 단위 테스트 어떻게 하는거지 도대체?
+        when(modelRepository.save(any(Model.class))).thenReturn(model);
 
         // when
-        AuthResponse.TokenDto tokenDto = authService.signupModel(modelJoinDto);
+        Model savedModel = authService.saveUser(modelJoinDto, userEmail);
 
         // then
-        System.out.println("tokenDto.getAccessToken() = " + tokenDto.getAccessToken());
-
+        assertThat(savedModel.getUsername()).isEqualTo(userName);
+        assertThat(savedModel.getEmail()).isEqualTo(userEmail);
     }
 
     @Test
-    @DisplayName("모델 회원가입 - 닉네임 중복 예외")
-    void When_ModelNicknameExists_Expect_NicknameDuplicatedException() {
+    @DisplayName("아티스트 저장")
+    void When_JoinArtist_Expect_SaveArtist() {
+        // given
+        String userName = "T1 Faker";
+        String userEmail = "test@gmail.com";
 
+        AuthRequest.ArtistJoinDto artistJoinDto = createArtistJoinDto(userName);
+        Artist artist = UserConverter.toArtist(artistJoinDto, userEmail, "ARTIST");
+
+        when(artistRepository.save(any(Artist.class))).thenReturn(artist);
+
+        // when
+        Artist savedArtist = authService.saveUser(artistJoinDto, userEmail);
+
+        // then
+        assertThat(savedArtist.getUsername()).isEqualTo(userName);
+        assertThat(savedArtist.getEmail()).isEqualTo(userEmail);
     }
 
     @Test
-    @DisplayName("아티스트 회원가입 - 정상")
-    void When_ArtistNicknameUnique_Expect_ReturnTokenDto() {
+    @DisplayName("로그인 진행 시 토큰 반환")
+    void When_RequestUser_Expect_ReturnTokenPair() {
+        // given
+        String userName = "GEN Chovy";
+        String userEmail = "test@naver.com";
 
+        AuthRequest.ModelJoinDto modelJoinDto = createModelJoinDto(userName);
+        User user = UserConverter.toModel(modelJoinDto, userEmail, "MODEL");
+
+        String accessToken = "access_token";
+        String refreshToken = "refresh_token";
+        String[] tokenPair = new String[]{
+                accessToken, refreshToken
+        };
+
+        // Authentication 객체까지 직접 우리가 구현해야하네
+        Authentication authentication = new TestingAuthenticationToken(userName, userEmail);
+
+        when(jwtTokenProvider.createTokenPair(any())).thenReturn(tokenPair);
+        when(authenticationManager.authenticate(any())).thenReturn(authentication);  // 일단 서비스에 있는 의존성은 다 넣어야 하나보다..
+
+        // when
+        String[] savedTokenPair = authService.login(user);
+
+        // then
+        assertThat(savedTokenPair[0]).isEqualTo(accessToken);
+        assertThat(savedTokenPair[1]).isEqualTo(refreshToken);
     }
 
-    @Test
-    @DisplayName("아티스트 회원가입 - 닉네임 중복 예외")
-    void When_ArtistNicknameExists_Expect_NicknameDuplicatedException() {
-
+    private AuthRequest.ModelJoinDto createModelJoinDto(String userName) {
+        return AuthRequest.ModelJoinDto.builder()
+                .id_token("test_id_token")
+                .provider(Provider.KAKAO)
+                .profile_img("test_profile_img")
+                .username(userName)
+                .nickname("test_nickname")
+                .gender(Gender.MALE)
+                .skin_type(SkinType.COMMON)
+                .personal_color(PersonalColor.SUMMER)
+                .build();
+    }
+    private AuthRequest.ArtistJoinDto createArtistJoinDto(String userName) {
+        return AuthRequest.ArtistJoinDto.builder()
+                .id_token("test_id_token")
+                .provider(Provider.KAKAO)
+                .profile_img("test_profile_img")
+                .username(userName)
+                .nickname("test_nickname")
+                .build();
     }
 }
