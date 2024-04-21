@@ -127,15 +127,15 @@ public class AuthService {
         return userRepository.existsByNickname(nicknameDto.getNickname());
     }
 
-    private Model saveUser(AuthRequest.ModelJoinDto modelJoinDto, String userEmail) {
+    protected Model saveUser(AuthRequest.ModelJoinDto modelJoinDto, String userEmail) {
         return modelRepository.save(UserConverter.toModel(modelJoinDto, userEmail, ROLE_MODEL));
     }
 
-    private Artist saveUser(AuthRequest.ArtistJoinDto artistJoinDto, String userEmail) {
+    protected Artist saveUser(AuthRequest.ArtistJoinDto artistJoinDto, String userEmail) {
         return artistRepository.save(UserConverter.toArtist(artistJoinDto, userEmail, ROLE_ARTIST));
     }
 
-    private String[] login(User user) {
+    protected String[] login(User user) {
         Authentication authentication = authenticate(user);
 
         String[] tokenPair = jwtTokenProvider.createTokenPair(authentication);
@@ -146,7 +146,7 @@ public class AuthService {
         return tokenPair;
     }
 
-    private Authentication authenticate(User user) throws AuthException {
+    protected Authentication authenticate(User user) throws AuthException {
         Authentication authentication;
 
         try {
@@ -163,7 +163,7 @@ public class AuthService {
         return authentication;
     }
 
-    private String getUserEmail(String idToken, Provider provider) throws AuthException {
+    protected String getUserEmail(String idToken, Provider provider) throws AuthException {
         OAuthProvider oAuthProvider;
 
         if (provider.equals(KAKAO)) {  // Use Kakao OpenID Connect
@@ -177,20 +177,20 @@ public class AuthService {
         return oAuthProvider.getUserEmail(idToken);
     }
 
-    private void saveTokenPairInRedis(String accessToken, String refreshToken) {
+    protected void saveTokenPairInRedis(String accessToken, String refreshToken) {
         tokenRepository.save(Token.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build());
     }
 
-    private void deleteTokenPairInRedis(String requestAccessToken) throws AuthException {
+    protected void deleteTokenPairInRedis(String requestAccessToken) throws AuthException {
         Token findToken = tokenRepository.findByAccessToken(requestAccessToken)
                 .orElseThrow(() -> new AuthException(TOKEN_MISMATCH_EXCEPTION));
         tokenRepository.delete(findToken);
     }
 
-    private String resolveToken(String bearerToken) {
+    protected String resolveToken(String bearerToken) {
         if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
             return bearerToken.substring(7);
         }
