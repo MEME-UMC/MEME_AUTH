@@ -21,9 +21,11 @@ import umc.meme.auth.global.enums.Gender;
 import umc.meme.auth.global.enums.PersonalColor;
 import umc.meme.auth.global.enums.Provider;
 import umc.meme.auth.global.enums.SkinType;
+import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
@@ -38,9 +40,11 @@ class AuthServiceTest {
     @Mock
     private JwtTokenProvider jwtTokenProvider;
     @Mock
-    private TokenRepository tokenRepository;
-    @Mock
     private AuthenticationManager authenticationManager;
+    @Mock
+    private TokenRepository tokenRepository;
+
+    private final static String TOKEN_PREFIX = "Bearer ";
 
     @Test
     @DisplayName("모델 저장")
@@ -110,6 +114,31 @@ class AuthServiceTest {
         // then
         assertThat(savedTokenPair[0]).isEqualTo(accessToken);
         assertThat(savedTokenPair[1]).isEqualTo(refreshToken);
+    }
+
+    @Test
+    @DisplayName("토큰에 올바른 인증 타입 Prefix 포함")
+    void When_RequestBearerTokenWithPrefix_Expect_TokenWithoutPrefix() {
+        // given
+        String bearerToken = TOKEN_PREFIX + "meme-test-token";
+
+        // when
+        String tokenWithoutPrefix = authService.resolveToken(bearerToken);
+
+        // then
+        assertThat(tokenWithoutPrefix).isEqualTo(bearerToken.substring(7));
+    }
+
+    @Test
+    @DisplayName("토큰에 올바르지 않은 인증 타입 Prefix 포함")
+    void When_RequestBearerTokenWithWeirdPrefix_Expect_TokenWithoutPrefix() {
+        // given
+        String bearerToken = "Bear " + "meme-test-token";
+
+        // then
+        assertThrows(AuthException.class, () -> {
+            authService.resolveToken(bearerToken);
+        });
     }
 
     private AuthRequest.ModelJoinDto createModelJoinDto(String userName) {

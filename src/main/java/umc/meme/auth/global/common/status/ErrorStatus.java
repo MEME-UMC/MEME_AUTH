@@ -60,7 +60,8 @@ public enum ErrorStatus implements BaseErrorCode {
     CANNOT_FOUND_USER(HttpStatus.UNAUTHORIZED, 401, "등록된 사용자가 아닙니다."),
     NO_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, 401, "Refresh Token이 없습니다."),
     ANOTHER_USER(HttpStatus.UNAUTHORIZED, 401, "토큰 탈취 위협이 있습니다."),
-    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "사용자를 찾을 수 없습니다.");
+    USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "사용자를 찾을 수 없습니다."),
+    TOKEN_UNSUPPORTED(HttpStatus.UNAUTHORIZED, 401, "올바른 형식의 토큰이 아닙니다.");
 
 
     private final HttpStatus httpStatus;

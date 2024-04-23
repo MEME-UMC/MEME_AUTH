@@ -191,10 +191,10 @@ public class AuthService {
     }
 
     protected String resolveToken(String bearerToken) {
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(7);
-        }
-        return null;
+        if (bearerToken == null || !bearerToken.startsWith(TOKEN_PREFIX))
+            throw new AuthException(TOKEN_UNSUPPORTED);
+
+        return bearerToken.substring(7);
     }
 
     // TODO : Need Refactoring
