@@ -136,9 +136,7 @@ class AuthServiceTest {
         String bearerToken = "Bear " + "meme-test-token";
 
         // then
-        assertThrows(AuthException.class, () -> {
-            authService.resolveToken(bearerToken);
-        });
+        assertThrows(AuthException.class, () -> authService.resolveToken(bearerToken));
     }
 
     private AuthRequest.ModelJoinDto createModelJoinDto(String userName) {
