@@ -1,4 +1,4 @@
-package umc.meme.auth.global.auth.converter;
+package umc.meme.auth.global.converter;
 
 import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.global.auth.dto.AuthResponse;

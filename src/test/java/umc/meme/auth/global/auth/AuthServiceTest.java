@@ -15,7 +15,7 @@ import umc.meme.auth.domain.model.entity.Model;
 import umc.meme.auth.domain.model.entity.ModelRepository;
 import umc.meme.auth.domain.token.entity.TokenRepository;
 import umc.meme.auth.domain.user.entity.User;
-import umc.meme.auth.global.auth.converter.UserConverter;
+import umc.meme.auth.global.converter.UserConverter;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.enums.Gender;
 import umc.meme.auth.global.enums.PersonalColor;

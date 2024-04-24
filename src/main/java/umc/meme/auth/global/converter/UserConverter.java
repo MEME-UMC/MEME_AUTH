@@ -1,4 +1,4 @@
-package umc.meme.auth.global.auth.converter;
+package umc.meme.auth.global.converter;
 
 import umc.meme.auth.domain.artist.entity.Artist;
 import umc.meme.auth.domain.model.entity.Model;
