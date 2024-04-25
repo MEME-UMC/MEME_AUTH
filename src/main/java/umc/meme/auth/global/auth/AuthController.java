@@ -26,7 +26,7 @@ public class AuthController {
      * @throws AuthException
      */
     @PostMapping("/api/v1/signup/model")
-    public BaseResponseDto<AuthResponse.JoinDto> signupModel(@RequestBody AuthRequest.ModelJoinDto modelJoinDto) throws AuthException{
+    public BaseResponseDto<AuthResponse.JoinDto> signupModel(@RequestBody AuthRequest.ModelJoinDto modelJoinDto) throws AuthException {
         return BaseResponseDto.SuccessResponse(SuccessStatus.MODEL_JOIN_SUCCESS, authService.signupModel(modelJoinDto));
     }
 

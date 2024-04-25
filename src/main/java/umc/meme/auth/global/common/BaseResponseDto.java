@@ -23,13 +23,13 @@ public class BaseResponseDto<T> {
         return new BaseResponseDto<>(status.getCode(), "SUCCESS", status.getMessage(), data);
     }
     public static BaseResponseDto SuccessResponse(SuccessStatus status) {
-        return new BaseResponseDto<>(status.getCode(), "SUCCESS", status.getMessage(), "");
+        return new BaseResponseDto<>(status.getCode(), "SUCCESS", status.getMessage(), null);
     }
 
     public static <T>BaseResponseDto<T> ErrorResponse(ErrorStatus status, T data) {
         return new BaseResponseDto<>(status.getCode(), "FAILURE", status.getMessage(), data);
     }
     public static BaseResponseDto ErrorResponse(ErrorStatus status) {
-        return new BaseResponseDto<>(status.getCode(), "FAILURE", status.getMessage(), "");
+        return new BaseResponseDto<>(status.getCode(), "FAILURE", status.getMessage(), null);
     }
 }

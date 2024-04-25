@@ -48,10 +48,11 @@ public class AuthService {
     private static final String USERNAME = "username";
     private final static String ROLE_MODEL = "MODEL";
     private final static String ROLE_ARTIST = "ARTIST";
+    private final static int MAX_LENGTH_NICKNAME = 15;
 
     @Transactional
-    public AuthResponse.JoinDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) {
-        // ID 토큰을 뜯는 메서드를 따로 만들어야하나..
+    public AuthResponse.JoinDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) throws AuthException {
+        checkNicknameLessThanMaxLength(modelJoinDto.getNickname());
         String userEmail = getUserEmail(modelJoinDto.getId_token(), modelJoinDto.getProvider());
         User user = saveUser(modelJoinDto, userEmail);
         String[] tokenPair = login(user);
@@ -59,7 +60,8 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse.JoinDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) {
+    public AuthResponse.JoinDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) throws AuthException {
+        checkNicknameLessThanMaxLength(artistJoinDto.getNickname());
         String userEmail = getUserEmail(artistJoinDto.getId_token(), artistJoinDto.getProvider());
         User user = saveUser(artistJoinDto, userEmail);
         String[] tokenPair = login(user);
@@ -195,6 +197,11 @@ public class AuthService {
             throw new AuthException(TOKEN_UNSUPPORTED);
 
         return bearerToken.substring(7);
+    }
+
+    protected void checkNicknameLessThanMaxLength(String nickname) throws AuthException {
+        if (nickname.length() > MAX_LENGTH_NICKNAME)
+            throw new AuthException(NICKNAME_LENGTH_EXCEPTION);
     }
 
     // TODO : Need Refactoring

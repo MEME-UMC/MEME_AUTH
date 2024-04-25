@@ -28,7 +28,7 @@ public class User {
     protected String profileImg;
 
     @NotNull
-    @Column(length = 40)
+    @Column(length = 15)
     protected String nickname;
 
     @NotNull
