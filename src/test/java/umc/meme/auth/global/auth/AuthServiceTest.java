@@ -2,21 +2,21 @@ package umc.meme.auth.global.auth;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import umc.meme.auth.annotation.IntegrationTest;
+import umc.meme.auth.annotation.UnitTest;
 import umc.meme.auth.domain.artist.entity.Artist;
 import umc.meme.auth.domain.artist.entity.ArtistRepository;
 import umc.meme.auth.domain.model.entity.Model;
 import umc.meme.auth.domain.model.entity.ModelRepository;
 import umc.meme.auth.domain.token.entity.TokenRepository;
 import umc.meme.auth.domain.user.entity.User;
-import umc.meme.auth.global.converter.UserConverter;
 import umc.meme.auth.global.auth.dto.AuthRequest;
+import umc.meme.auth.global.converter.UserConverter;
 import umc.meme.auth.global.enums.Gender;
 import umc.meme.auth.global.enums.PersonalColor;
 import umc.meme.auth.global.enums.Provider;
@@ -29,8 +29,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class AuthServiceTest {
+@IntegrationTest
+class AuthServiceIntegrationTest {
+
+}
+
+@UnitTest
+class AuthServiceUnitTest {
     @InjectMocks
     private AuthService authService;
     @Mock
@@ -45,6 +50,7 @@ class AuthServiceTest {
     private TokenRepository tokenRepository;
 
     private final static String TOKEN_PREFIX = "Bearer ";
+    private final static String TOKEN_PREFIX_WEIRD = "Bear ";
 
     @Test
     @DisplayName("모델 저장")
@@ -87,7 +93,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("로그인 진행 시 토큰 반환")
+    @DisplayName("로그인 성공 시 토큰 반환")
     void When_RequestUser_Expect_ReturnTokenPair() {
         // given
         String userName = "GEN Chovy";
@@ -117,7 +123,7 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("토큰에 올바른 인증 타입 Prefix 포함")
+    @DisplayName("올바른 Token Prefix")
     void When_RequestBearerTokenWithPrefix_Expect_TokenWithoutPrefix() {
         // given
         String bearerToken = TOKEN_PREFIX + "meme-test-token";
@@ -130,10 +136,10 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("토큰에 올바르지 않은 인증 타입 Prefix 포함")
+    @DisplayName("올바르지 않은 Token Prefix")
     void When_RequestBearerTokenWithWeirdPrefix_Expect_TokenWithoutPrefix() {
         // given
-        String bearerToken = "Bear " + "meme-test-token";
+        String bearerToken = TOKEN_PREFIX_WEIRD + "meme-test-token";
 
         // then
         assertThrows(AuthException.class, () -> authService.resolveToken(bearerToken));
