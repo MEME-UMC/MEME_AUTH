@@ -56,51 +56,80 @@ class AuthServiceUnitTest {
     @DisplayName("모델 저장")
     void When_JoinModel_Expect_SaveModel() {
         // given
-        String userName = "GEN Chovy";
-        String userEmail = "test@naver.com";
+        String name = "정지훈";
+        String email = "geng@naver.com";
+        String nickname = "쵸비";
 
-        AuthRequest.ModelJoinDto modelJoinDto = createModelJoinDto(userName);
-        Model model = UserConverter.toModel(modelJoinDto, userEmail, "MODEL");
+        AuthRequest.ModelJoinDto modelJoinDto = createModelJoinDto(name, nickname);
+        Model model = UserConverter.toModel(modelJoinDto, email, "MODEL");
 
         when(modelRepository.save(any(Model.class))).thenReturn(model);
 
         // when
-        Model savedModel = authService.saveUser(modelJoinDto, userEmail);
+        Model savedModel = authService.saveUser(modelJoinDto, email);
 
         // then
-        assertThat(savedModel.getUsername()).isEqualTo(userName);
-        assertThat(savedModel.getEmail()).isEqualTo(userEmail);
+        assertThat(savedModel.getUsername()).isEqualTo(name);
+        assertThat(savedModel.getEmail()).isEqualTo(email);
     }
 
     @Test
     @DisplayName("아티스트 저장")
     void When_JoinArtist_Expect_SaveArtist() {
         // given
-        String userName = "T1 Faker";
-        String userEmail = "test@gmail.com";
+        String name = "대상혁";
+        String email = "sktt1@gmail.com";
+        String nickname = "페이커";
 
-        AuthRequest.ArtistJoinDto artistJoinDto = createArtistJoinDto(userName);
-        Artist artist = UserConverter.toArtist(artistJoinDto, userEmail, "ARTIST");
+        AuthRequest.ArtistJoinDto artistJoinDto = createArtistJoinDto(name, nickname);
+        Artist artist = UserConverter.toArtist(artistJoinDto, email, "ARTIST");
 
         when(artistRepository.save(any(Artist.class))).thenReturn(artist);
 
         // when
-        Artist savedArtist = authService.saveUser(artistJoinDto, userEmail);
+        Artist savedArtist = authService.saveUser(artistJoinDto, email);
 
         // then
-        assertThat(savedArtist.getUsername()).isEqualTo(userName);
-        assertThat(savedArtist.getEmail()).isEqualTo(userEmail);
+        assertThat(savedArtist.getUsername()).isEqualTo(name);
+        assertThat(savedArtist.getEmail()).isEqualTo(email);
+    }
+
+    @Test
+    @DisplayName("모델 닉네임 길이 제한")
+    void When_ModelNicknameLengthOverThanMaxLength_Expect_Exception() {
+        // given
+        String name = "정지훈";
+        String nickname = "쵸오오오오오오오오오오오오오오비";
+
+        AuthRequest.ModelJoinDto modelJoinDto = createModelJoinDto(name, nickname);
+
+        // then
+        assertThrows(AuthException.class, () -> authService.signupModel(modelJoinDto));
+    }
+
+    @Test
+    @DisplayName("아티스트 닉네임 길이 제한")
+    void When_ArtistNicknameLengthOverThanMaxLength_Expect_Exception() {
+        // given
+        String name = "페이커";
+        String nickname = "젠장또대상혁이잖아초전도혁킹상혁";
+
+        AuthRequest.ArtistJoinDto artistJoinDto = createArtistJoinDto(name, nickname);
+
+        // then
+        assertThrows(AuthException.class, () -> authService.signupArtist(artistJoinDto));
     }
 
     @Test
     @DisplayName("로그인 성공 시 토큰 반환")
     void When_RequestUser_Expect_ReturnTokenPair() {
         // given
-        String userName = "GEN Chovy";
-        String userEmail = "test@naver.com";
+        String name = "정지훈";
+        String email = "testmail@naver.com";
+        String nickname = "쵸비";
 
-        AuthRequest.ModelJoinDto modelJoinDto = createModelJoinDto(userName);
-        User user = UserConverter.toModel(modelJoinDto, userEmail, "MODEL");
+        AuthRequest.ModelJoinDto modelJoinDto = createModelJoinDto(name, nickname);
+        User user = UserConverter.toModel(modelJoinDto, email, "MODEL");
 
         String accessToken = "access_token";
         String refreshToken = "refresh_token";
@@ -109,7 +138,7 @@ class AuthServiceUnitTest {
         };
 
         // Authentication 객체까지 직접 우리가 구현해야하네
-        Authentication authentication = new TestingAuthenticationToken(userName, userEmail);
+        Authentication authentication = new TestingAuthenticationToken(name, email);
 
         when(jwtTokenProvider.createTokenPair(any())).thenReturn(tokenPair);
         when(authenticationManager.authenticate(any())).thenReturn(authentication);  // 일단 서비스에 있는 의존성은 다 넣어야 하나보다..
@@ -137,7 +166,7 @@ class AuthServiceUnitTest {
 
     @Test
     @DisplayName("올바르지 않은 Token Prefix")
-    void When_RequestBearerTokenWithWeirdPrefix_Expect_TokenWithoutPrefix() {
+    void When_RequestBearerTokenWithWeirdPrefix_Expect_Exception() {
         // given
         String bearerToken = TOKEN_PREFIX_WEIRD + "meme-test-token";
 
@@ -145,25 +174,25 @@ class AuthServiceUnitTest {
         assertThrows(AuthException.class, () -> authService.resolveToken(bearerToken));
     }
 
-    private AuthRequest.ModelJoinDto createModelJoinDto(String userName) {
+    private AuthRequest.ModelJoinDto createModelJoinDto(String userName, String nickname) {
         return AuthRequest.ModelJoinDto.builder()
                 .id_token("test_id_token")
                 .provider(Provider.KAKAO)
                 .profile_img("test_profile_img")
                 .username(userName)
-                .nickname("test_nickname")
+                .nickname(nickname)
                 .gender(Gender.MALE)
                 .skin_type(SkinType.COMMON)
                 .personal_color(PersonalColor.SUMMER)
                 .build();
     }
-    private AuthRequest.ArtistJoinDto createArtistJoinDto(String userName) {
+    private AuthRequest.ArtistJoinDto createArtistJoinDto(String userName, String nickname) {
         return AuthRequest.ArtistJoinDto.builder()
                 .id_token("test_id_token")
                 .provider(Provider.KAKAO)
                 .profile_img("test_profile_img")
                 .username(userName)
-                .nickname("test_nickname")
+                .nickname(nickname)
                 .build();
     }
 }
