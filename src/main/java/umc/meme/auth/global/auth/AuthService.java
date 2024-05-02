@@ -3,9 +3,7 @@ package umc.meme.auth.global.auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import umc.meme.auth.domain.artist.entity.Artist;
@@ -16,23 +14,19 @@ import umc.meme.auth.domain.token.entity.Token;
 import umc.meme.auth.domain.token.entity.TokenRepository;
 import umc.meme.auth.domain.user.entity.User;
 import umc.meme.auth.domain.user.entity.UserRepository;
+import umc.meme.auth.global.converter.TokenConverter;
+import umc.meme.auth.global.converter.UserConverter;
 import umc.meme.auth.global.auth.dto.AuthRequest;
 import umc.meme.auth.global.auth.dto.AuthResponse;
-import umc.meme.auth.global.common.status.ErrorStatus;
-import umc.meme.auth.global.config.SecurityConfig;
 import umc.meme.auth.global.enums.Provider;
-import umc.meme.auth.global.enums.UserStatus;
-import umc.meme.auth.global.exception.GeneralException;
 import umc.meme.auth.global.exception.AuthException;
 import umc.meme.auth.global.infra.RedisRepository;
 import umc.meme.auth.global.jwt.JwtTokenProvider;
-import umc.meme.auth.global.oauth.service.OAuthService;
-import umc.meme.auth.global.oauth.service.apple.AppleAuthService;
-import umc.meme.auth.global.oauth.service.kakao.KakaoAuthService;
+import umc.meme.auth.global.oauth.provider.OAuthProvider;
+import umc.meme.auth.global.oauth.provider.apple.AppleAuthProvider;
+import umc.meme.auth.global.oauth.provider.kakao.KakaoAuthProvider;
 
-import java.time.LocalDate;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static umc.meme.auth.global.common.status.ErrorStatus.*;
 import static umc.meme.auth.global.enums.Provider.APPLE;
@@ -42,109 +36,36 @@ import static umc.meme.auth.global.enums.Provider.KAKAO;
 @Service
 public class AuthService {
 
-    private final AuthenticationManager authenticationManager;
-    private final PrincipalDetailsService principalDetailsService;
-    private final JwtTokenProvider jwtTokenProvider;
-    private final TokenRepository tokenRepository;
-    private final UserRepository userRepository;
-    private final RedisRepository redisRepository;
-    private final ModelRepository modelRepository;
-    private final ArtistRepository artistRepository;
-    private final KakaoAuthService kakaoAuthService;
-    private final AppleAuthService appleAuthService;
+    private final ModelRepository modelRepository;  // 필수 - 사용자 저장
+    private final ArtistRepository artistRepository;  // 필수 - 사용자 저장
+    private final AuthenticationManager authenticationManager;  // 필수 - 로그인
+    private final JwtTokenProvider jwtTokenProvider;  // 필수 - 토큰 생성
+    private final TokenRepository tokenRepository;  // 필수 - 토큰 저장 및 삭제
+    private final UserRepository userRepository;  // 필수 - 사용자 정보 조회
+    private final RedisRepository redisRepository;  // 필수 - 자식 클래스 의존성 주입 시 필요
 
     private final static String TOKEN_PREFIX = "Bearer ";
+    private static final String USERNAME = "username";
+    private final static String ROLE_MODEL = "MODEL";
+    private final static String ROLE_ARTIST = "ARTIST";
+    private final static int MAX_LENGTH_NICKNAME = 15;
 
     @Transactional
-    public AuthResponse.TokenDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) {
-        String userEmail = getUser(modelJoinDto.getId_token(), modelJoinDto.getProvider());
-        String nickName = modelJoinDto.getNickname();
-
-        if(userRepository.existsByNickname(nickName))
-            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
-
-        User user = Model.builder()
-                .email(userEmail)
-                .provider(modelJoinDto.getProvider())
-                .profileImg(modelJoinDto.getProfile_img())
-                .username(modelJoinDto.getUsername())
-                .nickname(nickName)
-                .gender(modelJoinDto.getGender())
-                .skinType(modelJoinDto.getSkin_type())
-                .personalColor(modelJoinDto.getPersonal_color())
-                .password(SecurityConfig.passwordEncoder().encode(userEmail))
-                .role("MODEL")
-                .inactiveDate(LocalDate.of(2099,12,31))
-                .userStatus(UserStatus.ACTIVE)
-                .build();
-
-        Long userId = modelRepository.save((Model) user).getUserId();
-
-        AuthResponse.TokenDto tokenDto = login(user);
-        tokenDto.setUserId(userId);
-        tokenDto.setDetails(true);
-        tokenDto.setType("MODEL");
-
-        return tokenDto;
+    public AuthResponse.JoinDto signupModel(AuthRequest.ModelJoinDto modelJoinDto) throws AuthException {
+        checkNicknameLessThanMaxLength(modelJoinDto.getNickname());
+        String userEmail = getUserEmail(modelJoinDto.getId_token(), modelJoinDto.getProvider());
+        User user = saveUser(modelJoinDto, userEmail);
+        String[] tokenPair = login(user);
+        return TokenConverter.toJoinDto(user, tokenPair, ROLE_MODEL);
     }
 
     @Transactional
-    public AuthResponse.TokenDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) {
-        String userEmail = getUser(artistJoinDto.getId_token(), artistJoinDto.getProvider());
-        String nickName = artistJoinDto.getNickname();
-
-        if(userRepository.existsByNickname(nickName))
-            throw new GeneralException(ErrorStatus.NICKNAME_DUPLICATED);
-
-        User user = Artist.builder()
-                .email(userEmail)
-                .provider(artistJoinDto.getProvider())
-                .profileImg(artistJoinDto.getProfile_img())
-                .username(artistJoinDto.getUsername())
-                .nickname(nickName)
-                .password(SecurityConfig.passwordEncoder().encode(userEmail))
-                .role("ARTIST")
-                .details(false)
-                .inactiveDate(LocalDate.of(2099,12,31))
-                .userStatus(UserStatus.ACTIVE)
-                .build();
-
-        Long userId = artistRepository.save((Artist) user).getUserId();
-
-        AuthResponse.TokenDto tokenDto = login(user);
-        tokenDto.setUserId(userId);
-        tokenDto.setDetails(user.getDetails());
-        tokenDto.setType("ARTIST");
-
-        return tokenDto;
-    }
-
-    @Transactional
-    public void signupArtistExtra(AuthRequest.ArtistExtraDto artistExtraDto) {
-        Artist artist = artistRepository.findById(artistExtraDto.getUser_id())
-                .orElseThrow(() -> new AuthException(ARTIST_NOT_FOUND));
-        artist.update(artistExtraDto);
-    }
-
-    @Transactional
-    public AuthResponse.TokenDto login(User user) throws AuthException {
-        Authentication authentication;
-        try {
-            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getEmail()));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (DisabledException exception) {
-            throw new DisabledException("DISABLED_EXCEPTION", exception);
-        } catch (LockedException exception) {
-            throw new LockedException("LOCKED_EXCEPTION", exception);
-        } catch (BadCredentialsException exception) {
-            throw new BadCredentialsException("BAD_CREDENTIALS_EXCEPTION", exception);
-        } catch (AuthException exception) {
-            throw exception;
-        }
-
-        UserDetails userDetails = principalDetailsService.loadUserByUsername(user.getUsername());
-        AuthResponse.TokenDto tokenDto = generateToken(userDetails.getUsername(), getAuthorities(authentication));
-        return tokenDto;
+    public AuthResponse.JoinDto signupArtist(AuthRequest.ArtistJoinDto artistJoinDto) throws AuthException {
+        checkNicknameLessThanMaxLength(artistJoinDto.getNickname());
+        String userEmail = getUserEmail(artistJoinDto.getId_token(), artistJoinDto.getProvider());
+        User user = saveUser(artistJoinDto, userEmail);
+        String[] tokenPair = login(user);
+        return TokenConverter.toJoinDto(user, tokenPair, ROLE_ARTIST);
     }
 
     @Transactional
@@ -156,112 +77,139 @@ public class AuthService {
                 .orElseThrow(() -> new AuthException(CANNOT_FOUND_USER));
 
         if (requestToken.getRefreshToken() == null) {
-            deleteRefreshToken(requestAccessToken);
+            // Case 1 : refresh token을 가지고 있지 않은 경우
+            deleteTokenPairInRedis(requestAccessToken);
             throw new AuthException(NO_REFRESH_TOKEN);
-        }
-
-        if (!requestToken.getRefreshToken().equals(requestRefreshToken)) {
-            deleteRefreshToken(requestAccessToken);
+        } else if (!requestToken.getRefreshToken().equals(requestRefreshToken)) {
+            // Case 2 : access token과 refresh token이 일치하지 않는 경우 -> 토큰 탈취 가능성 존재
+            deleteTokenPairInRedis(requestAccessToken);
             throw new AuthException(ANOTHER_USER);
-        }
+        } else {
+            // Case 3 : 정상적인 경우
+            deleteTokenPairInRedis(requestAccessToken);
+            Authentication authentication = jwtTokenProvider.getAuthentication(requestAccessToken);
+            String[] tokenPair = jwtTokenProvider.createTokenPair(authentication);
 
-        deleteRefreshToken(requestAccessToken);
-        Authentication authentication = jwtTokenProvider.getAuthentication(requestAccessToken);
-        UserDetails userDetails = principalDetailsService.loadUserByUsername(authentication.getName());
-        return generateToken(userDetails.getUsername(), getAuthorities(authentication));
+            return TokenConverter.toTokenDto(tokenPair);
+        }
     }
 
     @Transactional
     public void logout(String requestHeader) throws AuthException {
         String requestAccessToken = resolveToken(requestHeader);
-        deleteRefreshToken(requestAccessToken);
+        deleteTokenPairInRedis(requestAccessToken);
         SecurityContextHolder.clearContext();
     }
 
     @Transactional
     public void withdraw(String requestHeader) throws AuthException {
         String requestAccessToken = resolveToken(requestHeader);
-        String username = (String) jwtTokenProvider.getClaims(requestAccessToken).get("username");
+        String username = (String) jwtTokenProvider.getClaims(requestAccessToken).get(USERNAME);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AuthException(USER_NOT_FOUND));
         userRepository.delete(user);
     }
 
-    // 회원 등록 여부 조회
     @Transactional
-    public AuthResponse.UserInfoDto isUserExistsFindByEmail(AuthRequest.IdTokenDto idTokenDto) {
-        String email = "";
+    public AuthResponse.UserInfoDto checkUserExistsFindByEmail(AuthRequest.IdTokenDto idTokenDto) {
+        String userEmail = getUserEmail(idTokenDto.getId_token(), idTokenDto.getProvider());
+        Optional<User> userOptional = userRepository.findByEmail(userEmail);
 
-        if (idTokenDto.getProvider() == KAKAO) {
-            email = kakaoAuthService.getUserInfo(idTokenDto.getId_token());
-        } else if (idTokenDto.getProvider() == APPLE) {
-            email = appleAuthService.getUserInfo(idTokenDto.getId_token());
-        }
+        if (userOptional.isEmpty())
+            return UserConverter.toUserInfoDtoNonExists();
 
-        // ID 토큰을 파라미터로 받음
-        // String email = oAuthService.getUserInfo(idToken);
-        Optional<User> userOptional = userRepository.findByEmail(email);
+        User user = userOptional.get();
+        String[] tokenPair = login(user);
 
-        AuthResponse.UserInfoDto userInfoDto = new AuthResponse.UserInfoDto();
-
-        if (userOptional.isPresent()) {
-            AuthResponse.TokenDto loginDto = login(userOptional.get());
-
-            userInfoDto.setUser(true);
-            userInfoDto.setUserId(userOptional.get().getUserId());
-            userInfoDto.setRole(userOptional.get().getRole());
-            userInfoDto.setAccessToken(loginDto.getAccessToken());
-            userInfoDto.setRefreshToken(loginDto.getRefreshToken());
-        } else {
-            userInfoDto.setUser(false);
-        }
-
-        return userInfoDto;
+        return UserConverter.toUserInfoDtoExists(user, tokenPair);
     }
 
-    private String getUser(String idToken, Provider provider) throws AuthException {
-        OAuthService oAuthService;
+    @Transactional
+    public boolean checkNicknameDuplicate(AuthRequest.NicknameDto nicknameDto) {
+        return userRepository.existsByNickname(nicknameDto.getNickname());
+    }
 
-        if (provider.equals(KAKAO)) {
-            oAuthService = new KakaoAuthService(userRepository, redisRepository);
-        } else if (provider.equals(APPLE)) {
-            oAuthService = new AppleAuthService(userRepository, redisRepository);
+    protected Model saveUser(AuthRequest.ModelJoinDto modelJoinDto, String userEmail) {
+        return modelRepository.save(UserConverter.toModel(modelJoinDto, userEmail, ROLE_MODEL));
+    }
+
+    protected Artist saveUser(AuthRequest.ArtistJoinDto artistJoinDto, String userEmail) {
+        return artistRepository.save(UserConverter.toArtist(artistJoinDto, userEmail, ROLE_ARTIST));
+    }
+
+    protected String[] login(User user) {
+        Authentication authentication = authenticate(user);
+
+        String[] tokenPair = jwtTokenProvider.createTokenPair(authentication);
+        String accessToken = tokenPair[0];
+        String refreshToken = tokenPair[1];
+        saveTokenPairInRedis(accessToken, refreshToken);
+
+        return tokenPair;
+    }
+
+    protected Authentication authenticate(User user) throws AuthException {
+        Authentication authentication;
+
+        try {
+            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getEmail()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (DisabledException exception) {
+            throw new DisabledException("DISABLED_EXCEPTION", exception);
+        } catch (LockedException exception) {
+            throw new LockedException("LOCKED_EXCEPTION", exception);
+        } catch (BadCredentialsException exception) {
+            throw new BadCredentialsException("BAD_CREDENTIALS_EXCEPTION", exception);
+        }
+
+        return authentication;
+    }
+
+    protected String getUserEmail(String idToken, Provider provider) throws AuthException {
+        OAuthProvider oAuthProvider;
+
+        if (provider.equals(KAKAO)) {  // Use Kakao OpenID Connect
+            oAuthProvider = new KakaoAuthProvider(redisRepository);
+        } else if (provider.equals(APPLE)) {  // Use Apple OpenID Connect
+            oAuthProvider = new AppleAuthProvider(redisRepository);
         } else {
             throw new AuthException(PROVIDER_ERROR);
         }
 
-        return oAuthService.getUserInfo(idToken);
+        return oAuthProvider.getUserEmail(idToken);
     }
 
-    private AuthResponse.TokenDto generateToken(String username, String authorities) {
-        AuthResponse.TokenDto tokenDto = jwtTokenProvider.createToken(username, authorities);
-        saveRefreshToken(tokenDto.getAccessToken(), tokenDto.getRefreshToken());
-        return tokenDto;
-    }
-
-    private void saveRefreshToken(String accessToken, String refreshToken) {
+    protected void saveTokenPairInRedis(String accessToken, String refreshToken) {
         tokenRepository.save(Token.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build());
     }
 
-    private void deleteRefreshToken(String accessToken) throws AuthException {
-        Token findToken = tokenRepository.findByAccessToken(accessToken)
+    protected void deleteTokenPairInRedis(String requestAccessToken) throws AuthException {
+        Token findToken = tokenRepository.findByAccessToken(requestAccessToken)
                 .orElseThrow(() -> new AuthException(TOKEN_MISMATCH_EXCEPTION));
         tokenRepository.delete(findToken);
     }
 
-    public String getAuthorities(Authentication authentication) {
-        return authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+    protected String resolveToken(String bearerToken) {
+        if (bearerToken == null || !bearerToken.startsWith(TOKEN_PREFIX))
+            throw new AuthException(TOKEN_UNSUPPORTED);
+
+        return bearerToken.substring(7);
     }
 
-    private String resolveToken(String bearerToken) {
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(7);
-        }
-        return null;
+    protected void checkNicknameLessThanMaxLength(String nickname) throws AuthException {
+        if (nickname.length() > MAX_LENGTH_NICKNAME)
+            throw new AuthException(NICKNAME_LENGTH_EXCEPTION);
     }
+
+    // TODO : Need Refactoring
+    // 현재 API 중단 상태 -> 추후 리팩토링 예정
+//    @Transactional
+//    public void signupArtistExtra(AuthRequest.ArtistExtraDto artistExtraDto) {
+//        Artist artist = artistRepository.findById(artistExtraDto.getUser_id())
+//                .orElseThrow(() -> new AuthException(ARTIST_NOT_FOUND));
+//        artist.update(artistExtraDto);
+//    }
 }

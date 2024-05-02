@@ -9,46 +9,37 @@ public class AuthResponse {
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class TokenDto {
-        private Long userId;
-        private String accessToken;
-        private String refreshToken;
+    public static class JoinDto {
+        private String access_token;
+        private String refresh_token;
+        private Long user_id;
         private boolean details;
-        private String type;
+        private String role;
+    }
 
-        public TokenDto(String accessToken, String refreshToken) {
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
-        }
-
-        public void setUserId(Long userId) {
-            this.userId = userId;
-        }
-
-        public void setDetails(boolean details) {
-            this.details = details;
-        }
-
-        public void setType(String type) {
-            this.type = type;
-        }
+    @Data @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TokenDto {
+        private String access_token;
+        private String refresh_token;
     }
 
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AccessTokenDto {
-        private String accessToken;
+        private String access_token;
     }
 
     @Data @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class UserInfoDto {
-        private boolean isUser;
-        private Long userId;
+        private String access_token;
+        private String refresh_token;
+        private boolean user_status;
+        private Long user_id;
         private String role;
-        private String accessToken;
-        private String refreshToken;
     }
 }

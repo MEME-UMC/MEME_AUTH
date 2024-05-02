@@ -1,4 +1,4 @@
-package umc.meme.auth.global.exception.handler;
+package umc.meme.auth.global.handler;
 
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
