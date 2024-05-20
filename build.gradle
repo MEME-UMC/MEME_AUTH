@@ -48,7 +48,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 	// Embedded Redis
-	implementation 'it.ozimov:embedded-redis:0.7.2'
+//	implementation 'it.ozimov:embedded-redis:0.7.2'
 
 	// Swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
